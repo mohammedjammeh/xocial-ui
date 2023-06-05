@@ -133,56 +133,56 @@ button.regularBtn:hover {
 /*******************
     First Column 
 *******************/
-.eventForm {
+#eventForm {
 	width: 90%;
 	padding: 5%;
 }
 
-.eventForm > div {
+#eventForm > div {
 	margin: 0.5% 0 6% 0;
 }
 
-.eventForm > div:last-child {
+#eventForm > div:last-child {
 	margin: 0 0 0.75% 0;
 }
 
-.eventForm > div.dateAndTime {
+#eventForm > div.dateAndTime {
 	overflow: hidden;
 }
 
-.eventForm > div.dateAndTime div.date {
+#eventForm > div.dateAndTime div.date {
 	float: left;
 	width: 42%;
 }
 
-.eventForm > div.dateAndTime div.time {
+#eventForm > div.dateAndTime div.time {
 	float: right;
 	width: 56%;
 }
 
-.eventForm input,
-.eventForm select,
-.eventForm textarea {
+#eventForm input,
+#eventForm select,
+#eventForm textarea {
 	width: 100%;
 }
 
-.eventForm > div.dateAndTime div.date input {
+#eventForm > div.dateAndTime div.date input {
 	width: 100%;
 }
 
-.eventForm > div.dateAndTime div.time input {
+#eventForm > div.dateAndTime div.time input {
 	width: 49%;
 }
 
-.eventForm > div.dateAndTime div.time input.startTime {
+#eventForm > div.dateAndTime div.time input.startTime {
 	float: left;
 }
 
-.eventForm > div.dateAndTime div.time input.endTime {
+#eventForm > div.dateAndTime div.time input.endTime {
 	float: right;
 }
 
-.eventForm div input.broadcastBtn {
+#eventForm div input.broadcastBtn {
 	width: 37%;
 }
 
@@ -272,7 +272,7 @@ nav ul li a:hover {
 
 .event {
 	padding: 0.5% 0 2.5%;
-	margin: 0 0 2.6%;
+	margin: 0 0 3%;
 }
 
 .event p {
