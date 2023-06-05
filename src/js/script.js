@@ -9,24 +9,29 @@ if (typeof window.ethereum == 'undefined') {
 const eventForm = document.getElementById('eventForm');
 const connectBtn = document.getElementById('connectBtn');
 
-// Variables (Web3)
 const provider = new ethers.providers.Web3Provider(window.ethereum);
-const accounts = await provider.listAccounts();
-const accountExists = accounts.length > 0;
+
+// Event Handlers
+window.ethereum.on('accountsChanged', async function () {
+	const accounts = await provider.listAccounts();
+	if (accounts.length == 0) {
+		connectBtn.classList.remove('hide');
+	}
+});
 
 // Functions
 async function connect() {
 	await window.ethereum.request({ method: 'eth_requestAccounts' });
-	connectedSetup();
+	connectBtn.classList.add('hide');
 }
 
-async function connectedSetup() {
-	connectBtn.innerHTML = 'Disconnect From My Wallet';
-}
-
-if (!accountExists) {
+// Application
+const accounts = await provider.listAccounts();
+if (accounts.length == 0) {
 	eventForm.addEventListener('submit', connect);
 	connectBtn.addEventListener('click', connect);
+
+	connectBtn.classList.remove('hide');
 }
 
 // const main = async () => {

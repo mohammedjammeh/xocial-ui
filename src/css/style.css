@@ -130,6 +130,11 @@ button.regularBtn:hover {
 	background: #999;
 }
 
+/* others */
+.hide {
+	display: none;
+}
+
 /*******************
     First Column 
 *******************/
