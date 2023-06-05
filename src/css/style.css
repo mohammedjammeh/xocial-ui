@@ -187,7 +187,7 @@ button.regularBtn:hover {
 	float: right;
 }
 
-#eventForm div input.broadcastBtn {
+#eventForm div input[type='submit'] {
 	width: 37%;
 }
 
