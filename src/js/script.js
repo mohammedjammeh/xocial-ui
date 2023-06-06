@@ -5,6 +5,8 @@ if (typeof window.ethereum == 'undefined') {
 	throw new Error('Please install Metamask!');
 }
 
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+
 // Variables (HTML Elements)
 const eventForm = document.getElementById('eventForm');
 
@@ -12,12 +14,10 @@ const homeBtn = document.getElementById('homeBtn');
 const profileBtn = document.getElementById('profileBtn');
 const connectBtn = document.getElementById('connectBtn');
 
-const broadcastBtns = document.querySelectorAll('.broadcastForm input');
+const broadcastForms = document.querySelectorAll('.broadcastForm form');
 const joinBtns = document.querySelectorAll('.joinBtn button');
 
 const userSuggestionsBtns = document.querySelectorAll('.userSuggestions button');
-
-const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 // Event Handlers
 window.ethereum.on('accountsChanged', async function () {
@@ -33,7 +33,9 @@ async function connect() {
 	connectBtn.classList.add('hide');
 }
 
-// Application
+/******************
+	Application
+******************/
 const accounts = await provider.listAccounts();
 if (accounts.length == 0) {
 	connectBtn.classList.remove('hide');
@@ -47,8 +49,8 @@ if (accounts.length == 0) {
 	profileBtn.addEventListener('click', connect);
 	connectBtn.addEventListener('click', connect);
 
-	broadcastBtns.forEach((btn) => {
-		btn.addEventListener('click', (event) => {
+	broadcastForms.forEach((form) => {
+		form.addEventListener('submit', (event) => {
 			event.preventDefault();
 			connect();
 		});
@@ -57,6 +59,32 @@ if (accounts.length == 0) {
 
 	userSuggestionsBtns.forEach((btn) => btn.addEventListener('click', connect));
 }
+
+// event form
+eventForm.addEventListener('submit', async (event) => {
+	event.preventDefault();
+
+	let type = document.getElementById('type').value;
+	let description = document.getElementById('description').value;
+	let location = document.getElementById('location').value;
+	let startDate = document.getElementById('startDate').value;
+	let startTime = document.getElementById('startTime').value;
+	let endTime = document.getElementById('endTime').value;
+	let to = document.getElementById('to').value;
+
+	const contract = new ethers.Contract(eventAddress, eventABI, provider.getSigner());
+
+	// const response = await contract.create(
+	// 	'0x0A2169dfcC633289285290a61BB4d10AFA131817',
+	// 	'Yoo Yoo Sess',
+	// 	'I just wan yooo',
+	// 	'Cus I can yooo',
+	// 	'2023'
+	// );
+
+	const all = await contract.getAll();
+	console.log(all);
+});
 
 // const main = async () => {
 // 	const signer = provider.getSigner();
