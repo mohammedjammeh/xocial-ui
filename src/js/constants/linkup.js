@@ -1,4 +1,4 @@
-export const linkupAddress = '0x123cAd628d95a689592583D9595595Ed8B8141e8';
+export const linkupAddress = '0x4C98F0CC59bF2B6BFD58c5949A5A661416A0aD16';
 
 export const linkupABI = [
 	{
@@ -14,7 +14,8 @@ export const linkupABI = [
 			{ internalType: 'string', name: '_status', type: 'string' },
 			{ internalType: 'string', name: '_description', type: 'string' },
 			{ internalType: 'string', name: '_location', type: 'string' },
-			{ internalType: 'uint256', name: '_moment', type: 'uint256' },
+			{ internalType: 'uint256', name: '_startTime', type: 'uint256' },
+			{ internalType: 'uint256', name: '_endTime', type: 'uint256' },
 			{ internalType: 'address[]', name: '_attendees', type: 'address[]' },
 		],
 		name: 'create',
@@ -32,7 +33,8 @@ export const linkupABI = [
 					{ internalType: 'string', name: 'status', type: 'string' },
 					{ internalType: 'string', name: 'description', type: 'string' },
 					{ internalType: 'string', name: 'location', type: 'string' },
-					{ internalType: 'uint256', name: 'moment', type: 'uint256' },
+					{ internalType: 'uint256', name: 'startTime', type: 'uint256' },
+					{ internalType: 'uint256', name: 'endTime', type: 'uint256' },
 					{ internalType: 'address[]', name: 'attendees', type: 'address[]' },
 				],
 				internalType: 'struct Linkup.LinkupStruct[]',
@@ -51,7 +53,8 @@ export const linkupABI = [
 			{ internalType: 'string', name: 'status', type: 'string' },
 			{ internalType: 'string', name: 'description', type: 'string' },
 			{ internalType: 'string', name: 'location', type: 'string' },
-			{ internalType: 'uint256', name: 'moment', type: 'uint256' },
+			{ internalType: 'uint256', name: 'startTime', type: 'uint256' },
+			{ internalType: 'uint256', name: 'endTime', type: 'uint256' },
 		],
 		stateMutability: 'view',
 		type: 'function',

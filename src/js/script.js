@@ -61,6 +61,17 @@ if (accounts.length == 0) {
 }
 
 // event form
+
+// let date = new Date().getTime();
+// let birthDateInUnixTimestamp = date / 1000;
+// console.log(birthDateInUnixTimestamp);
+
+// const d = new Date('2023-06-10 10:50:00');
+// console.log(d.getTime());
+
+// const unixTimeZero = Date.parse('2023-06-10 10:50:00');
+// console.log(unixTimeZero);
+
 linkupForm.addEventListener('submit', async (event) => {
 	event.preventDefault();
 
@@ -72,19 +83,35 @@ linkupForm.addEventListener('submit', async (event) => {
 	let endTime = document.getElementById('endTime').value;
 	let to = document.getElementById('to').value;
 
+	let startTimeUnix = Date.parse(startDate + ' ' + startTime + ':00') / 1000;
+	let endTimeUnix = Date.parse(startDate + ' ' + endTime + ':00') / 1000;
+
 	const contract = new ethers.Contract(linkupAddress, linkupABI, provider.getSigner());
 
-	const response = await contract.create(
-		'0x0A2169dfcC633289285290a61BB4d10AFA131817',
-		type,
-		description,
-		location,
-		'1950',
-		['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
-	);
+	//CREATE CONTRACT
+	// const response = await contract.create(
+	// 	'0x0A2169dfcC633289285290a61BB4d10AFA131817',
+	// 	type,
+	// 	description,
+	// 	location,
+	// 	startTimeUnix,
+	// 	endTimeUnix,
+	// 	['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
+	// );
 
+	// GET ALL
 	const all = await contract.getAll();
-	console.log(all);
+
+	// GET DATE //
+	// let storedStartTime = all[1].startTime.toNumber();
+	// let date = new Date(storedStartTime * 1000);
+	// date = new Date(storedStartTime);
+	// let hours = date.getHours();
+	// let minutes = '0' + date.getMinutes();
+	// let seconds = '0' + date.getSeconds();
+	// let formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2); // 10:30:23 format
+
+	// console.log(formattedTime);
 });
 
 // const main = async () => {
