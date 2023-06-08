@@ -33,6 +33,26 @@ async function connect() {
 	connectBtn.classList.add('hide');
 }
 
+function shakeLoadingDisplay() {
+	let largeLoadingElement = document.querySelectorAll('.loading span.large')[0];
+
+	if (largeLoadingElement.classList.contains('third')) {
+		largeLoadingElement.classList.remove('large');
+
+		let firstLoadingSpan = document.querySelectorAll('.loading span:first-of-type')[0];
+		firstLoadingSpan.classList.add('large');
+
+		return;
+	}
+
+	let nextLoadingElement = document.querySelectorAll('.loading span.large + span')[0];
+	nextLoadingElement.classList.add('large');
+	largeLoadingElement.classList.remove('large');
+}
+
+// const loadingDisplay = setInterval(shakeLoadingDisplay, 300);
+// clearInterval(loadingDisplay);
+
 /******************
 	Application
 ******************/
@@ -61,17 +81,6 @@ if (accounts.length == 0) {
 }
 
 // event form
-
-// let date = new Date().getTime();
-// let birthDateInUnixTimestamp = date / 1000;
-// console.log(birthDateInUnixTimestamp);
-
-// const d = new Date('2023-06-10 10:50:00');
-// console.log(d.getTime());
-
-// const unixTimeZero = Date.parse('2023-06-10 10:50:00');
-// console.log(unixTimeZero);
-
 linkupForm.addEventListener('submit', async (event) => {
 	event.preventDefault();
 
@@ -82,25 +91,26 @@ linkupForm.addEventListener('submit', async (event) => {
 	let startTime = document.getElementById('startTime').value;
 	let endTime = document.getElementById('endTime').value;
 	let to = document.getElementById('to').value;
-
 	let startTimeUnix = Date.parse(startDate + ' ' + startTime + ':00') / 1000;
 	let endTimeUnix = Date.parse(startDate + ' ' + endTime + ':00') / 1000;
 
 	const contract = new ethers.Contract(linkupAddress, linkupABI, provider.getSigner());
 
-	//CREATE CONTRACT
-	// const response = await contract.create(
-	// 	'0x0A2169dfcC633289285290a61BB4d10AFA131817',
-	// 	type,
-	// 	description,
-	// 	location,
-	// 	startTimeUnix,
-	// 	endTimeUnix,
-	// 	['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
-	// );
+	//CREATE
+	const response = await contract.create(
+		'0x0A2169dfcC633289285290a61BB4d10AFA131817',
+		type,
+		description,
+		location,
+		startTimeUnix,
+		endTimeUnix,
+		['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
+	);
 
 	// GET ALL
 	const all = await contract.getAll();
+
+	console.log(all);
 
 	// GET DATE //
 	// let storedStartTime = all[1].startTime.toNumber();

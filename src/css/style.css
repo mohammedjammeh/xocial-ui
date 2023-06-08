@@ -481,3 +481,28 @@ nav ul li a:hover {
 .contacts .search button i {
 	font-size: 14px;
 }
+
+/* section (table) */
+#loadingContainer {
+	background: #fff;
+	border: 1px solid #ccc;
+	padding: 20px 0 35px;
+}
+
+#loadingContainer div.loading span {
+	background: #ccc;
+	width: 10px;
+	height: 10px;
+	border-radius: 10px;
+	display: block;
+	margin: 2px 3px;
+	float: left;
+	transition: all 0.2s;
+}
+
+#loadingContainer div.loading span.large {
+	background: #a6a6a6;
+	width: 14px;
+	height: 14px;
+	margin: 0 3px;
+}
