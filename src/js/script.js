@@ -1,5 +1,5 @@
 import { ethers } from './ethers-5.1.esm.min.js';
-import { eventAddress, eventABI } from './constants/event.js';
+import { linkupAddress, linkupABI } from './constants/linkup.js';
 
 if (typeof window.ethereum == 'undefined') {
 	throw new Error('Please install Metamask!');
@@ -8,7 +8,7 @@ if (typeof window.ethereum == 'undefined') {
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 // Variables (HTML Elements)
-const eventForm = document.getElementById('eventForm');
+const linkupForm = document.getElementById('linkupForm');
 
 const homeBtn = document.getElementById('homeBtn');
 const profileBtn = document.getElementById('profileBtn');
@@ -40,7 +40,7 @@ const accounts = await provider.listAccounts();
 if (accounts.length == 0) {
 	connectBtn.classList.remove('hide');
 
-	eventForm.addEventListener('submit', (event) => {
+	linkupForm.addEventListener('submit', (event) => {
 		event.preventDefault();
 		connect();
 	});
@@ -61,7 +61,7 @@ if (accounts.length == 0) {
 }
 
 // event form
-eventForm.addEventListener('submit', async (event) => {
+linkupForm.addEventListener('submit', async (event) => {
 	event.preventDefault();
 
 	let type = document.getElementById('type').value;
@@ -72,7 +72,7 @@ eventForm.addEventListener('submit', async (event) => {
 	let endTime = document.getElementById('endTime').value;
 	let to = document.getElementById('to').value;
 
-	const contract = new ethers.Contract(eventAddress, eventABI, provider.getSigner());
+	const contract = new ethers.Contract(linkupAddress, linkupABI, provider.getSigner());
 
 	// const response = await contract.create(
 	// 	'0x0A2169dfcC633289285290a61BB4d10AFA131817',
@@ -88,7 +88,7 @@ eventForm.addEventListener('submit', async (event) => {
 
 // const main = async () => {
 // 	const signer = provider.getSigner();
-// 	const contract = new ethers.Contract(eventAddress, eventABI, signer);
+// 	const contract = new ethers.Contract(linkupAddress, linkupABI, signer);
 // 	const all = await contract.getAll();
 
 // 	console.log(all);

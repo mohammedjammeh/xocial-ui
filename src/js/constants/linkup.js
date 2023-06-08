@@ -1,6 +1,6 @@
-export const eventAddress = '0xf2e568c7CEB8AD043C3dB5d7e6e3ec31D98867e7';
+export const linkupAddress = '0xCaeCbA5C4A548a4B96C57CB8fD3065e477777DEA';
 
-export const eventABI = [
+export const linkupABI = [
 	{
 		inputs: [],
 		name: 'count',
@@ -33,7 +33,7 @@ export const eventABI = [
 					{ internalType: 'string', name: 'location', type: 'string' },
 					{ internalType: 'uint256', name: 'moment', type: 'uint256' },
 				],
-				internalType: 'struct LinkUp.LinkUpStruct[]',
+				internalType: 'struct Linkup.LinkupStruct[]',
 				name: '',
 				type: 'tuple[]',
 			},
@@ -43,7 +43,7 @@ export const eventABI = [
 	},
 	{
 		inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-		name: 'linkUps',
+		name: 'linkups',
 		outputs: [
 			{ internalType: 'address', name: 'owner', type: 'address' },
 			{ internalType: 'string', name: 'name', type: 'string' },

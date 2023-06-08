@@ -138,56 +138,56 @@ button.regularBtn:hover {
 /*******************
     First Column 
 *******************/
-#eventForm {
+#linkupForm {
 	width: 90%;
 	padding: 5%;
 }
 
-#eventForm > div {
+#linkupForm > div {
 	margin: 0.5% 0 6% 0;
 }
 
-#eventForm > div:last-child {
+#linkupForm > div:last-child {
 	margin: 0 0 0.75% 0;
 }
 
-#eventForm > div.dateAndTime {
+#linkupForm > div.dateAndTime {
 	overflow: hidden;
 }
 
-#eventForm > div.dateAndTime div.date {
+#linkupForm > div.dateAndTime div.date {
 	float: left;
 	width: 42%;
 }
 
-#eventForm > div.dateAndTime div.time {
+#linkupForm > div.dateAndTime div.time {
 	float: right;
 	width: 56%;
 }
 
-#eventForm input,
-#eventForm select,
-#eventForm textarea {
+#linkupForm input,
+#linkupForm select,
+#linkupForm textarea {
 	width: 100%;
 }
 
-#eventForm > div.dateAndTime div.date input {
+#linkupForm > div.dateAndTime div.date input {
 	width: 100%;
 }
 
-#eventForm > div.dateAndTime div.time input {
+#linkupForm > div.dateAndTime div.time input {
 	width: 49%;
 }
 
-#eventForm > div.dateAndTime div.time input.startTime {
+#linkupForm > div.dateAndTime div.time input.startTime {
 	float: left;
 }
 
-#eventForm > div.dateAndTime div.time input.endTime {
+#linkupForm > div.dateAndTime div.time input.endTime {
 	float: right;
 }
 
-#eventForm div input[type='submit'] {
+#linkupForm div input[type='submit'] {
 	width: 37%;
 }
 
@@ -270,37 +270,37 @@ nav ul li a:hover {
     Middle Column 
 *******************/
 
-/* event */
-.eventList {
+/* linkup */
+.linkups {
 	letter-spacing: 0.25px;
 }
 
-.event {
+.linkup {
 	padding: 0.5% 0 2.5%;
 	margin: 0 0 3%;
 }
 
-.event p {
+.linkup p {
 	text-align: center;
 	margin: 3.75% 0;
 }
 
-.event p i {
+.linkup p i {
 	color: #999;
 	font-size: 14px;
 	margin-right: 3px;
 }
 
-.event .type {
+.linkup .type {
 	font-size: 17px;
 }
 
-.event .description {
+.linkup .description {
 	line-height: 1.6;
 	margin: 4% 5% 3.3%;
 }
 
-.event .members {
+.linkup .members {
 	overflow: hidden;
 	list-style: none;
 	padding-left: 0;
@@ -309,47 +309,47 @@ nav ul li a:hover {
 	margin: 0 auto;
 }
 
-.event .members li {
+.linkup .members li {
 	float: left;
 	margin: 2% 0;
 	text-align: center;
 	width: 50%;
 }
 
-.event .members li i {
+.linkup .members li i {
 	margin-left: 3px;
 	color: green;
 }
 
-.event .buttons {
+.linkup .buttons {
 	overflow: hidden;
 	width: 100%;
 	margin: 3% auto 3%;
 }
 
-.event .broadcastForm {
+.linkup .broadcastForm {
 	overflow: hidden;
 	width: 50%;
 	margin: 0 auto;
 }
 
-.event .broadcastForm select {
+.linkup .broadcastForm select {
 	width: 50%;
 	float: left;
 }
 
-.event .broadcastForm input {
+.linkup .broadcastForm input {
 	background: #f2f2f2;
 	color: #262626;
 	width: 48%;
 	float: right;
 }
 
-.event .broadcastForm input:hover {
+.linkup .broadcastForm input:hover {
 	background: #e6e6e6;
 }
 
-.event .joinBtn button {
+.linkup .joinBtn button {
 	display: block;
 	width: 22%;
 	margin: 3.5% auto 0;
