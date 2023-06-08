@@ -1,4 +1,4 @@
-export const linkupAddress = '0xCaeCbA5C4A548a4B96C57CB8fD3065e477777DEA';
+export const linkupAddress = '0x123cAd628d95a689592583D9595595Ed8B8141e8';
 
 export const linkupABI = [
 	{
@@ -11,10 +11,11 @@ export const linkupABI = [
 	{
 		inputs: [
 			{ internalType: 'address', name: '_owner', type: 'address' },
-			{ internalType: 'string', name: '_name', type: 'string' },
+			{ internalType: 'string', name: '_status', type: 'string' },
 			{ internalType: 'string', name: '_description', type: 'string' },
 			{ internalType: 'string', name: '_location', type: 'string' },
 			{ internalType: 'uint256', name: '_moment', type: 'uint256' },
+			{ internalType: 'address[]', name: '_attendees', type: 'address[]' },
 		],
 		name: 'create',
 		outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
@@ -28,10 +29,11 @@ export const linkupABI = [
 			{
 				components: [
 					{ internalType: 'address', name: 'owner', type: 'address' },
-					{ internalType: 'string', name: 'name', type: 'string' },
+					{ internalType: 'string', name: 'status', type: 'string' },
 					{ internalType: 'string', name: 'description', type: 'string' },
 					{ internalType: 'string', name: 'location', type: 'string' },
 					{ internalType: 'uint256', name: 'moment', type: 'uint256' },
+					{ internalType: 'address[]', name: 'attendees', type: 'address[]' },
 				],
 				internalType: 'struct Linkup.LinkupStruct[]',
 				name: '',
@@ -46,7 +48,7 @@ export const linkupABI = [
 		name: 'linkups',
 		outputs: [
 			{ internalType: 'address', name: 'owner', type: 'address' },
-			{ internalType: 'string', name: 'name', type: 'string' },
+			{ internalType: 'string', name: 'status', type: 'string' },
 			{ internalType: 'string', name: 'description', type: 'string' },
 			{ internalType: 'string', name: 'location', type: 'string' },
 			{ internalType: 'uint256', name: 'moment', type: 'uint256' },

@@ -74,13 +74,14 @@ linkupForm.addEventListener('submit', async (event) => {
 
 	const contract = new ethers.Contract(linkupAddress, linkupABI, provider.getSigner());
 
-	// const response = await contract.create(
-	// 	'0x0A2169dfcC633289285290a61BB4d10AFA131817',
-	// 	'Yoo Yoo Sess',
-	// 	'I just wan yooo',
-	// 	'Cus I can yooo',
-	// 	'2023'
-	// );
+	const response = await contract.create(
+		'0x0A2169dfcC633289285290a61BB4d10AFA131817',
+		type,
+		description,
+		location,
+		'1950',
+		['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
+	);
 
 	const all = await contract.getAll();
 	console.log(all);
