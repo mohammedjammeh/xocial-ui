@@ -159,6 +159,11 @@ all.forEach((linkup) => {
 	locationElement.innerHTML = ' ' + linkup.location;
 	linkupElement.appendChild(locationElement);
 
+	let locationIconElement = document.createElement('i');
+	locationIconElement.classList.add('fa-solid');
+	locationIconElement.classList.add('fa-location-dot');
+	locationElement.prepend(locationIconElement);
+
 	// moment
 	let momentElement = document.createElement('p');
 	momentElement.classList.add('moment');
@@ -174,12 +179,58 @@ all.forEach((linkup) => {
 	let descriptionElement = document.createElement('p');
 	descriptionElement.classList.add('description');
 	descriptionElement.innerHTML = ' ' + linkup.description;
-
 	linkupElement.appendChild(descriptionElement);
 
-	// Icons
-	let locationIconElement = document.createElement('i');
-	locationIconElement.classList.add('fa-solid');
-	locationIconElement.classList.add('fa-location-dot');
-	locationElement.prepend(locationIconElement);
+	// members
+	let membersContainer = document.createElement('ul');
+	membersContainer.classList.add('members');
+	linkupElement.appendChild(membersContainer);
+
+	linkup.attendees.forEach((member) => {
+		let memberElement = document.createElement('li');
+		memberElement.innerHTML = 'Alhaji Mballow'; // member
+		membersContainer.append(memberElement);
+
+		let memberIconElement = document.createElement('i');
+		memberIconElement.classList.add('fa-regular');
+		memberIconElement.classList.add('fa-circle-check');
+		memberElement.append(memberIconElement);
+	});
+
+	// buttons (broadcast)
+	let buttonsContainer = document.createElement('div');
+	buttonsContainer.classList.add('buttons');
+
+	let broadcastFormContainer = document.createElement('div');
+	broadcastFormContainer.classList.add('broadcastForm');
+
+	let broadcastFormElement = document.createElement('form');
+	let toElement = document.createElement('select');
+
+	linkup.attendees.forEach((member) => {
+		let toOptionElement = document.createElement('option');
+		toOptionElement.innerHTML = 'Elliot Mass';
+		toOptionElement.value = 'yooo';
+		toElement.append(toOptionElement);
+	});
+
+	let submitElement = document.createElement('input');
+	submitElement.value = 'Broadcast';
+	submitElement.type = 'submit';
+
+	buttonsContainer.append(broadcastFormContainer);
+	broadcastFormContainer.append(broadcastFormElement);
+	broadcastFormElement.append(toElement);
+	broadcastFormElement.append(submitElement);
+	linkupElement.appendChild(buttonsContainer);
+
+	// buttons (join)
+	let joinBtnContainer = document.createElement('div');
+	joinBtnContainer.classList.add('joinBtn');
+
+	let joinBtnElement = document.createElement('button');
+	joinBtnElement.innerHTML = 'Join';
+
+	joinBtnContainer.append(joinBtnElement);
+	linkupElement.appendChild(joinBtnContainer);
 });
