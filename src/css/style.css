@@ -363,36 +363,36 @@ nav ul li a:hover {
 	margin-bottom: 3%;
 }
 
-.profileForm p,
-.profileForm label {
+#profileForm p,
+#profileForm label {
 	margin: 0 0 2.5%;
 	font-size: 16px;
 }
 
-.profileForm .fullname {
+#profileForm .fullname {
 	margin-bottom: 5%;
 }
 
-.profileForm .fullname label {
+#profileForm .fullname label {
 	display: block;
 }
 
-.profileForm .fullname input {
+#profileForm .fullname input {
 	width: 100%;
 }
 
-.profileForm .musicTaste {
+#profileForm .musicTaste {
 	overflow: hidden;
 	margin: 2.5% 0;
 }
 
-.profileForm .musicTaste .inputContainer {
+#profileForm .musicTaste .inputContainer {
 	float: left;
 	width: 33.33%;
 	margin: 1% 0;
 }
 
-.profileForm .profileSaveBtn {
+#profileForm .profileSaveBtn {
 	width: 15%;
 	padding: 6px 5px 8px;
 }

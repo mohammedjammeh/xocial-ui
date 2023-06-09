@@ -123,7 +123,7 @@
 
 			<div class="middleColumn">
 				<div class="profile columnContainer">
-					<form method="#" class="profileForm">
+					<form method="#" id="profileForm">
 						<div class="fullname">
 							<label for="fullname">Full name</label>
 							<input type="text" name="fullname" id="fullname" placeholder="Full name" />
@@ -133,47 +133,47 @@
 							<p>Music Taste</p>
 
 							<div class="inputContainer">
-								<input type="checkbox" name="musicTaste[0]" id="musicTaste[0]" />
+								<input type="checkbox" name="musicTaste[]" id="musicTaste[0]" value="rap" />
 								<label for="musicTaste[0]">Rap</label>
 							</div>
 
 							<div class="inputContainer">
-								<input type="checkbox" name="musicTaste[1]" id="musicTaste[1]" />
+								<input type="checkbox" name="musicTaste[]" id="musicTaste[1]" value="rock" />
 								<label for="musicTaste[1]">Rock</label>
 							</div>
 
 							<div class="inputContainer">
-								<input type="checkbox" name="musicTaste[2]" id="musicTaste[2]" />
+								<input type="checkbox" name="musicTaste[]" id="musicTaste[2]" value="reggae" />
 								<label for="musicTaste[2]">Reggae</label>
 							</div>
 
 							<div class="inputContainer">
-								<input type="checkbox" name="musicTaste[3]" id="musicTaste[3]" />
+								<input type="checkbox" name="musicTaste[]" id="musicTaste[3]" value="dancehall" />
 								<label for="musicTaste[3]">Dancehall</label>
 							</div>
 
 							<div class="inputContainer">
-								<input type="checkbox" name="musicTaste[4]" id="musicTaste[4]" />
+								<input type="checkbox" name="musicTaste[]" id="musicTaste[4]" value="pop" />
 								<label for="musicTaste[4]">Pop</label>
 							</div>
 
 							<div class="inputContainer">
-								<input type="checkbox" name="musicTaste[5]" id="musicTaste[5]" />
+								<input type="checkbox" name="musicTaste[]" id="musicTaste[5]" value="afrobeats" />
 								<label for="musicTaste[5]">Afrobeats</label>
 							</div>
 
 							<div class="inputContainer">
-								<input type="checkbox" name="musicTaste[6]" id="musicTaste[6]" />
+								<input type="checkbox" name="musicTaste[]" id="musicTaste[6]" value="punk" />
 								<label for="musicTaste[6]">Punk</label>
 							</div>
 
 							<div class="inputContainer">
-								<input type="checkbox" name="musicTaste[7]" id="musicTaste[7]" />
-								<label for="musicTaste[7]">Heavy Metal</label>
+								<input type="checkbox" name="musicTaste[]" id="musicTaste[7]" value="amapiano" />
+								<label for="musicTaste[7]">Amapiano</label>
 							</div>
 
 							<div class="inputContainer">
-								<input type="checkbox" name="musicTaste[8]" id="musicTaste[8]" />
+								<input type="checkbox" name="musicTaste[]" id="musicTaste[8]" value="Drill" />
 								<label for="musicTaste[8]">Drill</label>
 							</div>
 						</div>
@@ -256,6 +256,7 @@
 		</section>
 
 		<script src="./js/script.js" type="module"></script>
+		<script src="./js/profile.js" type="module"></script>
 		<script src="https://kit.fontawesome.com/b1d79f2ea5.js" crossorigin="anonymous"></script>
 	</body>
 </html>
