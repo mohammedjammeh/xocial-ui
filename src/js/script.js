@@ -6,6 +6,10 @@ if (typeof window.ethereum == 'undefined') {
 }
 
 const provider = new ethers.providers.Web3Provider(window.ethereum);
+const linkupContract = new ethers.Contract(linkupAddress, linkupABI, provider.getSigner());
+
+const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Variables (HTML Elements)
 const linkupForm = document.getElementById('linkupForm');
@@ -16,6 +20,8 @@ const connectBtn = document.getElementById('connectBtn');
 
 const broadcastForms = document.querySelectorAll('.broadcastForm form');
 const joinBtns = document.querySelectorAll('.joinBtn button');
+
+const linkupContainer = document.querySelectorAll('.linkups')[0];
 
 const userSuggestionsBtns = document.querySelectorAll('.userSuggestions button');
 
@@ -31,6 +37,34 @@ window.ethereum.on('accountsChanged', async function () {
 async function connect() {
 	await window.ethereum.request({ method: 'eth_requestAccounts' });
 	connectBtn.classList.add('hide');
+}
+
+function getMoment(linkup) {
+	let startTime = new Date(linkup.startTime.toNumber() * 1000);
+	let endTime = new Date(linkup.endTime.toNumber() * 1000);
+
+	let startHour = ('0' + startTime.getHours()).slice(-2);
+	let startMins = ('0' + startTime.getMinutes()).slice(-2);
+
+	let endHours = ('0' + endTime.getHours()).slice(-2);
+	let endMins = ('0' + endTime.getMinutes()).slice(-2);
+
+	return (
+		days[startTime.getDay()] +
+		' ' +
+		startTime.getDate() +
+		' ' +
+		months[startTime.getMonth()] +
+		',' +
+		' ' +
+		startHour +
+		':' +
+		startMins +
+		' - ' +
+		endHours +
+		':' +
+		endMins
+	);
 }
 
 function shakeLoadingDisplay() {
@@ -80,7 +114,7 @@ if (accounts.length == 0) {
 	userSuggestionsBtns.forEach((btn) => btn.addEventListener('click', connect));
 }
 
-// event form
+// linkup form
 linkupForm.addEventListener('submit', async (event) => {
 	event.preventDefault();
 
@@ -94,10 +128,7 @@ linkupForm.addEventListener('submit', async (event) => {
 	let startTimeUnix = Date.parse(startDate + ' ' + startTime + ':00') / 1000;
 	let endTimeUnix = Date.parse(startDate + ' ' + endTime + ':00') / 1000;
 
-	const contract = new ethers.Contract(linkupAddress, linkupABI, provider.getSigner());
-
-	//CREATE
-	const response = await contract.create(
+	const response = await linkupContract.create(
 		'0x0A2169dfcC633289285290a61BB4d10AFA131817',
 		type,
 		description,
@@ -106,30 +137,49 @@ linkupForm.addEventListener('submit', async (event) => {
 		endTimeUnix,
 		['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
 	);
-
-	// GET ALL
-	const all = await contract.getAll();
-
-	console.log(all);
-
-	// GET DATE //
-	// let storedStartTime = all[1].startTime.toNumber();
-	// let date = new Date(storedStartTime * 1000);
-	// date = new Date(storedStartTime);
-	// let hours = date.getHours();
-	// let minutes = '0' + date.getMinutes();
-	// let seconds = '0' + date.getSeconds();
-	// let formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2); // 10:30:23 format
-
-	// console.log(formattedTime);
 });
 
-// const main = async () => {
-// 	const signer = provider.getSigner();
-// 	const contract = new ethers.Contract(linkupAddress, linkupABI, signer);
-// 	const all = await contract.getAll();
+// linkups
+const all = await linkupContract.getAll();
+all.forEach((linkup) => {
+	let linkupElement = document.createElement('div');
+	linkupElement.classList.add('linkup');
+	linkupElement.classList.add('columnContainer');
+	linkupContainer.prepend(linkupElement);
 
-// 	console.log(all);
-// };
+	// status
+	let statusElement = document.createElement('p');
+	statusElement.classList.add('type');
+	statusElement.innerHTML = '🎉 🎉 ' + linkup.status;
+	linkupElement.appendChild(statusElement);
 
-// main();
+	// location
+	let locationElement = document.createElement('p');
+	locationElement.classList.add('location');
+	locationElement.innerHTML = ' ' + linkup.location;
+	linkupElement.appendChild(locationElement);
+
+	// moment
+	let momentElement = document.createElement('p');
+	momentElement.classList.add('moment');
+	momentElement.innerHTML = ' ' + getMoment(linkup);
+	linkupElement.appendChild(momentElement);
+
+	let momentIconElement = document.createElement('i');
+	momentIconElement.classList.add('fa-regular');
+	momentIconElement.classList.add('fa-calendar');
+	momentElement.prepend(momentIconElement);
+
+	// description
+	let descriptionElement = document.createElement('p');
+	descriptionElement.classList.add('description');
+	descriptionElement.innerHTML = ' ' + linkup.description;
+
+	linkupElement.appendChild(descriptionElement);
+
+	// Icons
+	let locationIconElement = document.createElement('i');
+	locationIconElement.classList.add('fa-solid');
+	locationIconElement.classList.add('fa-location-dot');
+	locationElement.prepend(locationIconElement);
+});
