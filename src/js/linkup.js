@@ -3,7 +3,7 @@ import { linkupAddress, linkupABI } from './constants/linkup.js';
 
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 const linkupContract = new ethers.Contract(linkupAddress, linkupABI, provider.getSigner());
-const allLinkups = await linkupContract.getAll();
+// const allLinkups = await linkupContract.getAll();
 
 const linkupContainer = document.querySelectorAll('.linkups')[0];
 const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
@@ -57,96 +57,96 @@ function shakeLoadingDisplay() {
 // const loadingDisplay = setInterval(shakeLoadingDisplay, 300);
 // clearInterval(loadingDisplay);
 
-allLinkups.forEach((linkup) => {
-	let linkupElement = document.createElement('div');
-	linkupElement.classList.add('linkup');
-	linkupElement.classList.add('columnContainer');
-	linkupContainer.prepend(linkupElement);
+// allLinkups.forEach((linkup) => {
+// 	let linkupElement = document.createElement('div');
+// 	linkupElement.classList.add('linkup');
+// 	linkupElement.classList.add('columnContainer');
+// 	linkupContainer.prepend(linkupElement);
 
-	// status
-	let statusElement = document.createElement('p');
-	statusElement.classList.add('type');
-	statusElement.innerHTML = '🎉 🎉 ' + linkup.status;
-	linkupElement.appendChild(statusElement);
+// 	// status
+// 	let statusElement = document.createElement('p');
+// 	statusElement.classList.add('type');
+// 	statusElement.innerHTML = '🎉 🎉 ' + linkup.status;
+// 	linkupElement.appendChild(statusElement);
 
-	// location
-	let locationElement = document.createElement('p');
-	locationElement.classList.add('location');
-	locationElement.innerHTML = ' ' + linkup.location;
-	linkupElement.appendChild(locationElement);
+// 	// location
+// 	let locationElement = document.createElement('p');
+// 	locationElement.classList.add('location');
+// 	locationElement.innerHTML = ' ' + linkup.location;
+// 	linkupElement.appendChild(locationElement);
 
-	let locationIconElement = document.createElement('i');
-	locationIconElement.classList.add('fa-solid');
-	locationIconElement.classList.add('fa-location-dot');
-	locationElement.prepend(locationIconElement);
+// 	let locationIconElement = document.createElement('i');
+// 	locationIconElement.classList.add('fa-solid');
+// 	locationIconElement.classList.add('fa-location-dot');
+// 	locationElement.prepend(locationIconElement);
 
-	// moment
-	let momentElement = document.createElement('p');
-	momentElement.classList.add('moment');
-	momentElement.innerHTML = ' ' + getMoment(linkup);
-	linkupElement.appendChild(momentElement);
+// 	// moment
+// 	let momentElement = document.createElement('p');
+// 	momentElement.classList.add('moment');
+// 	momentElement.innerHTML = ' ' + getMoment(linkup);
+// 	linkupElement.appendChild(momentElement);
 
-	let momentIconElement = document.createElement('i');
-	momentIconElement.classList.add('fa-regular');
-	momentIconElement.classList.add('fa-calendar');
-	momentElement.prepend(momentIconElement);
+// 	let momentIconElement = document.createElement('i');
+// 	momentIconElement.classList.add('fa-regular');
+// 	momentIconElement.classList.add('fa-calendar');
+// 	momentElement.prepend(momentIconElement);
 
-	// description
-	let descriptionElement = document.createElement('p');
-	descriptionElement.classList.add('description');
-	descriptionElement.innerHTML = ' ' + linkup.description;
-	linkupElement.appendChild(descriptionElement);
+// 	// description
+// 	let descriptionElement = document.createElement('p');
+// 	descriptionElement.classList.add('description');
+// 	descriptionElement.innerHTML = ' ' + linkup.description;
+// 	linkupElement.appendChild(descriptionElement);
 
-	// members
-	let membersContainer = document.createElement('ul');
-	membersContainer.classList.add('members');
-	linkupElement.appendChild(membersContainer);
+// 	// members
+// 	let membersContainer = document.createElement('ul');
+// 	membersContainer.classList.add('members');
+// 	linkupElement.appendChild(membersContainer);
 
-	linkup.attendees.forEach((member) => {
-		let memberElement = document.createElement('li');
-		memberElement.innerHTML = 'Alhaji Mballow'; // member
-		membersContainer.append(memberElement);
+// 	linkup.attendees.forEach((member) => {
+// 		let memberElement = document.createElement('li');
+// 		memberElement.innerHTML = 'Alhaji Mballow'; // member
+// 		membersContainer.append(memberElement);
 
-		let memberIconElement = document.createElement('i');
-		memberIconElement.classList.add('fa-regular');
-		memberIconElement.classList.add('fa-circle-check');
-		memberElement.append(memberIconElement);
-	});
+// 		let memberIconElement = document.createElement('i');
+// 		memberIconElement.classList.add('fa-regular');
+// 		memberIconElement.classList.add('fa-circle-check');
+// 		memberElement.append(memberIconElement);
+// 	});
 
-	// buttons (broadcast)
-	let buttonsContainer = document.createElement('div');
-	buttonsContainer.classList.add('buttons');
+// 	// buttons (broadcast)
+// 	let buttonsContainer = document.createElement('div');
+// 	buttonsContainer.classList.add('buttons');
 
-	let broadcastFormContainer = document.createElement('div');
-	broadcastFormContainer.classList.add('broadcastForm');
+// 	let broadcastFormContainer = document.createElement('div');
+// 	broadcastFormContainer.classList.add('broadcastForm');
 
-	let broadcastFormElement = document.createElement('form');
-	let toElement = document.createElement('select');
+// 	let broadcastFormElement = document.createElement('form');
+// 	let toElement = document.createElement('select');
 
-	linkup.attendees.forEach((member) => {
-		let toOptionElement = document.createElement('option');
-		toOptionElement.innerHTML = 'Elliot Mass';
-		toOptionElement.value = 'yooo';
-		toElement.append(toOptionElement);
-	});
+// 	linkup.attendees.forEach((member) => {
+// 		let toOptionElement = document.createElement('option');
+// 		toOptionElement.innerHTML = 'Elliot Mass';
+// 		toOptionElement.value = 'yooo';
+// 		toElement.append(toOptionElement);
+// 	});
 
-	let submitElement = document.createElement('input');
-	submitElement.value = 'Broadcast';
-	submitElement.type = 'submit';
+// 	let submitElement = document.createElement('input');
+// 	submitElement.value = 'Broadcast';
+// 	submitElement.type = 'submit';
 
-	buttonsContainer.append(broadcastFormContainer);
-	broadcastFormContainer.append(broadcastFormElement);
-	broadcastFormElement.append(toElement);
-	broadcastFormElement.append(submitElement);
-	linkupElement.appendChild(buttonsContainer);
+// 	buttonsContainer.append(broadcastFormContainer);
+// 	broadcastFormContainer.append(broadcastFormElement);
+// 	broadcastFormElement.append(toElement);
+// 	broadcastFormElement.append(submitElement);
+// 	linkupElement.appendChild(buttonsContainer);
 
-	// buttons (join)
-	let joinBtnContainer = document.createElement('div');
-	joinBtnContainer.classList.add('joinBtn');
+// 	// buttons (join)
+// 	let joinBtnContainer = document.createElement('div');
+// 	joinBtnContainer.classList.add('joinBtn');
 
-	let joinBtnElement = document.createElement('button');
-	joinBtnElement.innerHTML = 'Join';
+// 	let joinBtnElement = document.createElement('button');
+// 	joinBtnElement.innerHTML = 'Join';
 
-	joinBtnContainer.append(joinBtnElement);
-	linkupElement.appendChild(joinBtnContainer);
-});
+// 	joinBtnContainer.append(joinBtnElement);
+// 	linkupElement.appendChild(joinBtnContainer);
+// });

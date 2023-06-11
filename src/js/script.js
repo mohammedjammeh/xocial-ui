@@ -85,3 +85,26 @@ linkupForm.addEventListener('submit', async (event) => {
 		['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
 	);
 });
+
+// nav
+
+function toggleDisplay(btn) {
+	let btnClasses = btn.classList;
+	btnClasses = Object.keys(btnClasses).map((key) => btnClasses[key]);
+
+	if (btnClasses.includes('attention')) {
+		btn.classList.remove('attention');
+
+		return;
+	}
+
+	btn.classList.add('attention');
+}
+
+const loadingDisplay = setInterval(() => {
+	connectBtn.children[1].classList.add('dot');
+
+	toggleDisplay(connectBtn);
+}, 800);
+
+// clearInterval(loadingDisplay);
