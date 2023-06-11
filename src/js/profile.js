@@ -1,8 +1,8 @@
 import { ethers } from './ethers-5.1.esm.min.js';
-import { linkupAddress, linkupABI } from './constants/linkup.js';
+import { userContractAddress, userContractABI } from './constants/user.js';
 
 const provider = new ethers.providers.Web3Provider(window.ethereum);
-const userContract = new ethers.Contract(linkupAddress, linkupABI, provider.getSigner());
+const userContract = new ethers.Contract(userContractAddress, userContractABI, provider.getSigner());
 const allUsers = await userContract.getAll();
 
 let profileForm = document.getElementById('profileForm');
@@ -20,16 +20,9 @@ profileForm.addEventListener('submit', async (event) => {
 		}
 	});
 
-	console.log(fullname);
-	console.log(selectedMusicTaste);
-
-	// const response = await linkupContract.create(
-	// 	'0x0A2169dfcC633289285290a61BB4d10AFA131817',
-	// 	type,
-	// 	description,
-	// 	location,
-	// 	startTimeUnix,
-	// 	endTimeUnix,
-	// 	['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
-	// );
+	const response = await userContract.create(
+		'0x0A2169dfcC633289285290a61BB4d10AFA131817',
+		fullname,
+		selectedMusicTaste
+	);
 });
