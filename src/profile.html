@@ -65,9 +65,24 @@
 
 					<nav>
 						<ul>
-							<li><a href="#" id="homeBtn" class="active">Home</a></li>
-							<li><a href="#" id="profileBtn">Update My Profile</a></li>
-							<li><a href="#" id="connectBtn" class="hide">Connect to My Wallet</a></li>
+							<li>
+								<a href="index.html" id="homeBtn">
+									<span>Home</span>
+									<span></span>
+								</a>
+							</li>
+							<li>
+								<a href="profile.html" id="profileBtn" class="active">
+									<span>Update My Profile</span>
+									<span></span>
+								</a>
+							</li>
+							<li>
+								<a href="#" id="connectBtn" class="hide">
+									<span>Connect to My Wallet</span>
+									<span class="dot"></span>
+								</a>
+							</li>
 						</ul>
 					</nav>
 				</div>
@@ -124,9 +139,9 @@
 			<div class="middleColumn">
 				<div class="profile columnContainer">
 					<form method="#" id="profileForm">
-						<div class="fullname">
-							<label for="fullname">Full name</label>
-							<input type="text" name="fullname" id="fullname" placeholder="Full name" />
+						<div class="fullName">
+							<label for="fullName">Full name</label>
+							<input type="text" name="fullName" id="fullName" placeholder="Full name" />
 						</div>
 
 						<div class="musicTaste">
@@ -188,7 +203,7 @@
 					<div>
 						<p class="heading">Contacts</p>
 
-						<div class="list">
+						<!-- <div class="list">
 							<div>
 								<p class="name">Mohammed Jammeh</p>
 								<p class="address">0x0A2169dfcC633289285290a61BB4d10AFA131817</p>
@@ -212,7 +227,7 @@
 									<button><i class="fa-solid fa-circle-minus"></i></button>
 								</div>
 							</div>
-						</div>
+						</div> -->
 					</div>
 
 					<div>
@@ -225,38 +240,13 @@
 							</form>
 						</div>
 
-						<div class="list">
-							<div>
-								<p class="name">Mohammed Jammeh</p>
-								<p class="address">0x0A2169dfcC633289285290a61BB4d10AFA131817</p>
-								<div class="removeBtnContainer">
-									<button><i class="fa-solid fa-circle-plus"></i></button>
-								</div>
-							</div>
-
-							<div>
-								<p class="name">Buba Jallow</p>
-								<p class="address">0x0A2169dfcC633289285290a61BB4d10AFA131817</p>
-								<div class="removeBtnContainer">
-									<button><i class="fa-solid fa-circle-plus"></i></button>
-								</div>
-							</div>
-
-							<div>
-								<p class="name">James Fisherman</p>
-								<p class="address">0x0A2169dfcC633289285290a61BB4d10AFA131817</p>
-								<div class="removeBtnContainer">
-									<button><i class="fa-solid fa-circle-plus"></i></button>
-								</div>
-							</div>
-						</div>
+						<div class="list"></div>
 					</div>
 				</div>
 			</div>
 		</section>
 
 		<script src="./js/script.js" type="module"></script>
-		<script src="./js/profile.js" type="module"></script>
 		<script src="https://kit.fontawesome.com/b1d79f2ea5.js" crossorigin="anonymous"></script>
 	</body>
 </html>
