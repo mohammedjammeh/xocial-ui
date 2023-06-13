@@ -105,13 +105,16 @@ linkupForm.addEventListener('submit', async (event) => {
 		endTimeUnix,
 		['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
 	);
+
+	// const txReceipt = await response.wait(1);
+	// console.log('txReceipt: ', txReceipt);
+
+	linkupContract.on('NewLinkup', (link) => {
+		console.log(link);
+	});
+
+	// console.log(response);
 });
-
-// const loadingDisplay = setInterval(() => {
-// 	toggleDotDisplay(connectBtn);
-// }, 800);
-
-// clearInterval(loadingDisplay);
 
 /******************
 	Profile
@@ -216,4 +219,13 @@ searchBtn.addEventListener('click', async (event) => {
 		searchElement.append(btnContainer);
 		searchContainer.append(searchElement);
 	});
+});
+
+const eventProvider = new ethers.providers.WebSocketProvider(
+	'wss://eth-sepolia.g.alchemy.com/v2/ZMwWseSEcXoDOA2dkn3Q8vyGnWtynmZX'
+);
+const eventContract = new ethers.Contract(linkupAddress, linkupABI, eventProvider.getSigner());
+
+eventContract.on('NewLinkup', (name, amount) => {
+	console.log(name, amount);
 });
