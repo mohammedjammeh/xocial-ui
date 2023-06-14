@@ -1,10 +1,5 @@
-// require('dotenv').config();
-import dotenv from './../../.env';
-import 'dotenv/config';
-
-console.log(process.env);
-
 import { ethers } from './ethers-5.1.esm.min.js';
+import { sepoliaRpcWss } from './constants/config.js';
 import { linkupAddress, linkupABI } from './constants/linkup.js';
 import { userContractAddress, userContractABI } from './constants/user.js';
 
@@ -17,9 +12,7 @@ if (typeof window.ethereum == 'undefined') {
 ******************/
 // providers
 const windowProvider = new ethers.providers.Web3Provider(window.ethereum);
-const wssProvider = new ethers.providers.WebSocketProvider(
-	'wss://eth-sepolia.g.alchemy.com/v2/ZMwWseSEcXoDOA2dkn3Q8vyGnWtynmZX'
-);
+const wssProvider = new ethers.providers.WebSocketProvider(sepoliaRpcWss);
 
 // account
 const accounts = await windowProvider.listAccounts();
