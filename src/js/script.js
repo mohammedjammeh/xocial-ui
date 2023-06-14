@@ -1,3 +1,9 @@
+// require('dotenv').config();
+import dotenv from './../../.env';
+import 'dotenv/config';
+
+console.log(process.env);
+
 import { ethers } from './ethers-5.1.esm.min.js';
 import { linkupAddress, linkupABI } from './constants/linkup.js';
 import { userContractAddress, userContractABI } from './constants/user.js';
@@ -20,6 +26,7 @@ const accounts = await windowProvider.listAccounts();
 
 // contracts
 const linkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvider.getSigner());
+const wssLinkupContract = new ethers.Contract(linkupAddress, linkupABI, wssProvider.getSigner());
 const unconnectedLinkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvider);
 const userContract = new ethers.Contract(userContractAddress, userContractABI, windowProvider.getSigner());
 
@@ -35,12 +42,14 @@ const homeBtn = document.getElementById('homeBtn');
 const profileBtn = document.getElementById('profileBtn');
 const connectBtn = document.getElementById('connectBtn');
 
+const loadingContainer = document.getElementById('loadingContainer');
 const linkupContainer = document.querySelectorAll('.linkups')[0];
 const userContainer = document.querySelectorAll('.user')[0];
 
 const userSuggestionsBtns = document.querySelectorAll('.userSuggestions button');
 
 // others
+let loadingInterval;
 const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -51,8 +60,11 @@ window.ethereum.on('accountsChanged', async function () {
 	location.reload();
 });
 
-new ethers.Contract(linkupAddress, linkupABI, wssProvider.getSigner()).on('NewLinkup', (name) => {
-	console.log(name);
+wssLinkupContract.on('NewLinkup', (linkup) => {
+	prependLinkUp(linkup);
+
+	loadingContainer.classList.add('hide');
+	clearInterval(loadingInterval);
 });
 
 /******************
@@ -77,7 +89,7 @@ if (accounts.length == 0) {
 	});
 
 	// linkups
-	linkups.forEach((linkup) => buildLinkUp(linkup));
+	linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	let broadcastForms = document.querySelectorAll('.broadcastForm form');
 	broadcastForms.forEach((form) => {
@@ -118,7 +130,11 @@ if (accounts.length == 0) {
 		let startTimeUnix = Date.parse(startDate + ' ' + startTime + ':00') / 1000;
 		let endTimeUnix = Date.parse(startDate + ' ' + endTime + ':00') / 1000;
 
-		const response = await linkupContract.create(
+		loadingContainer.classList.remove('hide');
+
+		loadingInterval = setInterval(() => shakeLoadingDisplay(), 300);
+
+		await linkupContract.create(
 			'0x0A2169dfcC633289285290a61BB4d10AFA131817',
 			document.getElementById('type').value,
 			document.getElementById('description').value,
@@ -127,19 +143,10 @@ if (accounts.length == 0) {
 			endTimeUnix,
 			['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
 		);
-
-		// const txReceipt = await response.wait(1);
-		// console.log('txReceipt: ', txReceipt);
-
-		linkupContract.on('NewLinkup', (link) => {
-			console.log(link);
-		});
-
-		// console.log(response);
 	});
 
 	// linkups
-	linkups.forEach((linkup) => buildLinkUp(linkup));
+	linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	/******************
 		Profile
@@ -271,7 +278,7 @@ function swingAttentionCircle(btn) {
 }
 
 // linkup
-function buildLinkUp(linkup) {
+function prependLinkUp(linkup) {
 	let linkupElement = document.createElement('div');
 	linkupElement.classList.add('linkup');
 	linkupElement.classList.add('columnContainer');
