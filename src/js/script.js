@@ -23,10 +23,14 @@ const linkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvi
 const unconnectedLinkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvider);
 const userContract = new ethers.Contract(userContractAddress, userContractABI, windowProvider.getSigner());
 
+// data
+const linkups = accounts.length == 0 ? await unconnectedLinkupContract.getAll() : await linkupContract.getAll();
+
 // html elements
 const linkupForm = document.getElementById('linkupForm');
 const profileForm = document.getElementById('profileForm');
 
+const navBtns = document.querySelectorAll('nav ul li a');
 const homeBtn = document.getElementById('homeBtn');
 const profileBtn = document.getElementById('profileBtn');
 const connectBtn = document.getElementById('connectBtn');
@@ -44,9 +48,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 	event handlers
 *********************/
 window.ethereum.on('accountsChanged', async function () {
-	if (accounts.length == 0) {
-		connectBtn.classList.remove('hide');
-	}
+	location.reload();
 });
 
 new ethers.Contract(linkupAddress, linkupABI, wssProvider.getSigner()).on('NewLinkup', (name) => {
@@ -60,9 +62,7 @@ new ethers.Contract(linkupAddress, linkupABI, wssProvider.getSigner()).on('NewLi
 // unconnected
 if (accounts.length == 0) {
 	// nav
-	homeBtn.addEventListener('click', connect);
-	profileBtn.addEventListener('click', connect);
-	connectBtn.addEventListener('click', connect);
+	navBtns.forEach((btn) => btn.addEventListener('click', connect));
 
 	connectBtn.classList.remove('hide');
 	setInterval(() => swingAttentionCircle(connectBtn), 800);
@@ -70,14 +70,14 @@ if (accounts.length == 0) {
 	// users
 	userSuggestionsBtns.forEach((btn) => btn.addEventListener('click', connect));
 
-	// linkups
+	// linkup form
 	linkupForm.addEventListener('submit', (event) => {
 		event.preventDefault();
 		connect();
 	});
 
-	let everyoneLinkups = await unconnectedLinkupContract.getAll();
-	everyoneLinkups.forEach((linkup) => buildLinkUp(linkup));
+	// linkups
+	linkups.forEach((linkup) => buildLinkUp(linkup));
 
 	let broadcastForms = document.querySelectorAll('.broadcastForm form');
 	broadcastForms.forEach((form) => {
@@ -94,11 +94,17 @@ if (accounts.length == 0) {
 	homeBtn.addEventListener('click', () => {
 		linkupContainer.classList.remove('hide');
 		userContainer.classList.add('hide');
+
+		navBtns.forEach((btn) => btn.classList.remove('active'));
+		homeBtn.classList.add('active');
 	});
 
 	profileBtn.addEventListener('click', () => {
 		linkupContainer.classList.add('hide');
 		userContainer.classList.remove('hide');
+
+		navBtns.forEach((btn) => btn.classList.remove('active'));
+		profileBtn.classList.add('active');
 	});
 
 	// linkup form
@@ -131,6 +137,9 @@ if (accounts.length == 0) {
 
 		// console.log(response);
 	});
+
+	// linkups
+	linkups.forEach((linkup) => buildLinkUp(linkup));
 
 	/******************
 		Profile
@@ -236,12 +245,6 @@ if (accounts.length == 0) {
 			searchContainer.append(searchElement);
 		});
 	});
-
-	/******************
-		Linkups
-	******************/
-	const allLinkups = await linkupContract.getAll();
-	allLinkups.forEach((linkup) => buildLinkUp(linkup));
 }
 
 /******************
