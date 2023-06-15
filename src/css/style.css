@@ -136,7 +136,6 @@ button.regularBtn:hover {
 }
 
 #loadingContainer {
-	padding: 12px 0 12px;
 	width: 100%;
 	margin: 0 auto;
 }
@@ -219,6 +218,10 @@ button.regularBtn:hover {
 
 #linkupForm div input[type='submit'] {
 	width: 37%;
+}
+
+#linkupForm div #loadingContainer {
+	padding: 12px 0 12px;
 }
 
 nav ul {
@@ -431,12 +434,18 @@ nav ul li a.attention span.dot {
 	width: 100%;
 }
 
-#profileForm .musicTaste {
+#profileForm .musicTaste,
+#profileForm .foodTaste,
+#profileForm .sportsTaste {
 	overflow: hidden;
 	margin: 2.5% 0;
+	margin: 0 0 5%;
+	/* margin: 2.5 0 2.5%; */
 }
 
-#profileForm .musicTaste .inputContainer {
+#profileForm .musicTaste .inputContainer,
+#profileForm .foodTaste .inputContainer,
+#profileForm .sportsTaste .inputContainer {
 	float: left;
 	width: 33.33%;
 	margin: 1% 0;
@@ -445,6 +454,10 @@ nav ul li a.attention span.dot {
 #profileForm .profileSaveBtn {
 	width: 15%;
 	padding: 6px 5px 8px;
+}
+
+#profileForm #loadingContainer {
+	padding: 10px 0 10px;
 }
 
 /* contacts */

@@ -33,6 +33,9 @@ let linkupFormLoadingContainer = document.querySelectorAll('#linkupForm #loading
 let linkupFormLoadingInterval;
 
 let profileForm = document.getElementById('profileForm');
+let profileFormBtn = document.querySelectorAll('#profileForm input[type="submit"]')[0];
+let profileFormLoadingContainer = document.querySelectorAll('#profileForm #loadingContainer')[0];
+let profileFormLoadingInterval;
 
 let navBtns = document.querySelectorAll('nav ul li a');
 let homeBtn = document.getElementById('homeBtn');
@@ -74,10 +77,8 @@ wssLinkupContract.on('NewLinkup', (linkup) => {
 /******************
 	Application
 ******************/
-// general
 document.getElementById('startDate').value = getTodayDate();
 
-// unconnected
 if (accounts.length == 0) {
 	// nav
 	navBtns.forEach((btn) => btn.addEventListener('click', connect));
@@ -85,16 +86,15 @@ if (accounts.length == 0) {
 	connectBtn.classList.remove('hide');
 	setInterval(() => swingAttentionCircle(connectBtn), 800);
 
-	// users
+	// suggestions
 	userSuggestionsBtns.forEach((btn) => btn.addEventListener('click', connect));
 
-	// linkup form
+	// linkup
 	linkupForm.addEventListener('submit', (event) => {
 		event.preventDefault();
 		connect();
 	});
 
-	// linkups
 	linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	let broadcastForms = document.querySelectorAll('.broadcastForm form');
@@ -109,56 +109,14 @@ if (accounts.length == 0) {
 	joinBtns.forEach((btn) => btn.addEventListener('click', connect));
 } else {
 	// nav
-	homeBtn.addEventListener('click', () => {
-		linkupContainer.classList.remove('hide');
-		userContainer.classList.add('hide');
+	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
+	profileBtn.addEventListener('click', () => goToView(userContainer, profileBtn));
 
-		navBtns.forEach((btn) => btn.classList.remove('active'));
-		homeBtn.classList.add('active');
-	});
-
-	profileBtn.addEventListener('click', () => {
-		linkupContainer.classList.add('hide');
-		userContainer.classList.remove('hide');
-
-		navBtns.forEach((btn) => btn.classList.remove('active'));
-		profileBtn.classList.add('active');
-	});
-
-	// linkup form
-	linkupForm.addEventListener('submit', async (event) => {
-		event.preventDefault();
-
-		let startDate = document.getElementById('startDate').value;
-		let startTime = document.getElementById('startTime').value;
-		let endTime = document.getElementById('endTime').value;
-		let to = document.getElementById('to').value;
-		let startTimeUnix = Date.parse(startDate + ' ' + startTime + ':00') / 1000;
-		let endTimeUnix = Date.parse(startDate + ' ' + endTime + ':00') / 1000;
-
-		linkupFormBtn.classList.add('hide');
-
-		linkupFormLoadingContainer.classList.remove('hide');
-		linkupFormLoadingInterval = setInterval(() => shakeLoadingDisplay(), 300);
-
-		await linkupContract.create(
-			'0x0A2169dfcC633289285290a61BB4d10AFA131817',
-			document.getElementById('type').value,
-			document.getElementById('description').value,
-			document.getElementById('location').value,
-			startTimeUnix,
-			endTimeUnix,
-			['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
-		);
-	});
-
-	// linkups
+	// linkup
+	linkupForm.addEventListener('submit', (event) => createLinkup(event));
 	linkups.forEach((linkup) => prependLinkUp(linkup));
 
-	/******************
-		Profile
-	******************/
-	// user form
+	// profile
 	let allUsers = await userContract.getAll();
 	let clientAddress = accounts[0];
 	// let clientAddress = '9826';
@@ -166,17 +124,30 @@ if (accounts.length == 0) {
 
 	let fullNameField = document.getElementById('fullName');
 	let musicTasteFields = document.getElementsByName('musicTaste[]');
+	let foodTasteFields = document.getElementsByName('foodTaste[]');
+	let sportsTasteFields = document.getElementsByName('sportsTaste[]');
 
 	if (storedAccount) {
-		// autofill Form
 		fullNameField.value = storedAccount['fullName'];
+
 		musicTasteFields.forEach((field) => {
 			if (storedAccount['musicTaste'].includes(field.value)) {
 				field.checked = true;
 			}
 		});
+
+		// foodTasteFields.forEach((field) => {
+		// 	if (storedAccount['foodTaste'].includes(field.value)) {
+		// 		field.checked = true;
+		// 	}
+		// });
+
+		// sportsTasteFields.forEach((field) => {
+		// 	if (storedAccount['sportsTaste'].includes(field.value)) {
+		// 		field.checked = true;
+		// 	}
+		// });
 	} else {
-		// profile nav attention
 		profileBtn.children[1].classList.add('dot');
 		setInterval(() => swingAttentionCircle(profileBtn), 800);
 	}
@@ -184,7 +155,6 @@ if (accounts.length == 0) {
 	profileForm.addEventListener('submit', async (event) => {
 		event.preventDefault();
 
-		// store profile form
 		let selectedMusicTaste = [];
 		musicTasteFields.forEach((field) => {
 			if (field.checked) {
@@ -192,7 +162,25 @@ if (accounts.length == 0) {
 			}
 		});
 
-		await userContract.create('0x0A2169dfcC633289285290a61BB4d10AFA131817', fullNameField.value, selectedMusicTaste);
+		let selectedFoodTaste = [];
+		foodTasteFields.forEach((field) => {
+			if (field.checked) {
+				selectedFoodTaste.push(field.value);
+			}
+		});
+
+		let selectedSportsTaste = [];
+		sportsTasteFields.forEach((field) => {
+			if (field.checked) {
+				selectedSportsTaste.push(field.value);
+			}
+		});
+
+		// await userContract.create('0x0A2169dfcC633289285290a61BB4d10AFA131817', fullNameField.value, selectedMusicTaste);
+
+		document.getElementsByClassName('profileSaveBtn')[0].classList.add('hide');
+		profileFormLoadingContainer.classList.remove('hide');
+		profileFormLoadingInterval = setInterval(() => shakeLoadingDisplay(profileFormLoadingContainer), 300);
 	});
 
 	// contact form
@@ -268,13 +256,27 @@ async function connect() {
 
 function getTodayDate() {
 	const today = new Date();
-	let mm = today.getMonth() + 1; // Months start at 0!
+	let mm = today.getMonth() + 1;
 	let dd = today.getDate();
 
 	if (dd < 10) dd = '0' + dd;
 	if (mm < 10) mm = '0' + mm;
 
 	return today.getFullYear() + '-' + mm + '-' + dd;
+}
+
+function goToView(activeContainer, activeBtn) {
+	let parentContainers = document.getElementsByClassName('middleColumn')[0].children;
+	for (let key in parentContainers) {
+		if (parentContainers.hasOwnProperty(key)) {
+			parentContainers[key].classList.add('hide');
+		}
+	}
+
+	activeContainer.classList.remove('hide');
+
+	navBtns.forEach((btn) => btn.classList.remove('active'));
+	activeBtn.classList.add('active');
 }
 
 // nav attention
@@ -292,6 +294,32 @@ function swingAttentionCircle(btn) {
 }
 
 // linkup
+async function createLinkup(event) {
+	event.preventDefault();
+
+	let startDate = document.getElementById('startDate').value;
+	let startTime = document.getElementById('startTime').value;
+	let endTime = document.getElementById('endTime').value;
+	let to = document.getElementById('to').value;
+	let startTimeUnix = Date.parse(startDate + ' ' + startTime + ':00') / 1000;
+	let endTimeUnix = Date.parse(startDate + ' ' + endTime + ':00') / 1000;
+
+	linkupFormBtn.classList.add('hide');
+
+	linkupFormLoadingContainer.classList.remove('hide');
+	linkupFormLoadingInterval = setInterval(() => shakeLoadingDisplay(linkupFormLoadingContainer), 300);
+
+	await linkupContract.create(
+		'0x0A2169dfcC633289285290a61BB4d10AFA131817',
+		document.getElementById('type').value,
+		document.getElementById('description').value,
+		document.getElementById('location').value,
+		startTimeUnix,
+		endTimeUnix,
+		['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
+	);
+}
+
 function prependLinkUp(linkup) {
 	let linkupElement = document.createElement('div');
 	linkupElement.classList.add('linkup');
@@ -414,19 +442,19 @@ function formatMoment(linkup) {
 	);
 }
 
-function shakeLoadingDisplay() {
-	let largeLoadingElement = document.querySelectorAll('.loading span.large')[0];
+function shakeLoadingDisplay(loadingContainer) {
+	let largeLoadingElement = loadingContainer.querySelectorAll('.loading span.large')[0];
 
 	if (largeLoadingElement.classList.contains('third')) {
 		largeLoadingElement.classList.remove('large');
 
-		let firstLoadingSpan = document.querySelectorAll('.loading span:first-of-type')[0];
+		let firstLoadingSpan = loadingContainer.querySelectorAll('.loading span:first-of-type')[0];
 		firstLoadingSpan.classList.add('large');
 
 		return;
 	}
 
-	let nextLoadingElement = document.querySelectorAll('.loading span.large + span')[0];
+	let nextLoadingElement = loadingContainer.querySelectorAll('.loading span.large + span')[0];
 	nextLoadingElement.classList.add('large');
 	largeLoadingElement.classList.remove('large');
 }
