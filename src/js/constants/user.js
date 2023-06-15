@@ -1,4 +1,4 @@
-export const userContractAddress = '0x0203B5Fab6F4145DC6c8269C0EA823B83fbE7cEd';
+export const userContractAddress = '0x36e0BED30c800062102517Ad06b0dF2AA0C4E33E';
 
 export const userContractABI = [
 	{
@@ -21,8 +21,10 @@ export const userContractABI = [
 	{
 		inputs: [
 			{ internalType: 'address', name: '_owner', type: 'address' },
-			{ internalType: 'string', name: '_fullName', type: 'string' },
+			{ internalType: 'string', name: '_fullname', type: 'string' },
 			{ internalType: 'string[]', name: '_musicTaste', type: 'string[]' },
+			{ internalType: 'string[]', name: '_foodTaste', type: 'string[]' },
+			{ internalType: 'string[]', name: '_sportsTaste', type: 'string[]' },
 		],
 		name: 'create',
 		outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
@@ -36,8 +38,10 @@ export const userContractABI = [
 			{
 				components: [
 					{ internalType: 'address', name: 'owner', type: 'address' },
-					{ internalType: 'string', name: 'fullName', type: 'string' },
+					{ internalType: 'string', name: 'fullname', type: 'string' },
 					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
+					{ internalType: 'string[]', name: 'foodTaste', type: 'string[]' },
+					{ internalType: 'string[]', name: 'sportsTaste', type: 'string[]' },
 					{ internalType: 'uint256[]', name: 'contacts', type: 'uint256[]' },
 				],
 				internalType: 'struct User.UserStruct[]',
@@ -49,11 +53,24 @@ export const userContractABI = [
 		type: 'function',
 	},
 	{
+		inputs: [
+			{ internalType: 'uint256', name: '_id', type: 'uint256' },
+			{ internalType: 'string', name: '_fullname', type: 'string' },
+			{ internalType: 'string[]', name: '_musicTaste', type: 'string[]' },
+			{ internalType: 'string[]', name: '_foodTaste', type: 'string[]' },
+			{ internalType: 'string[]', name: '_sportsTaste', type: 'string[]' },
+		],
+		name: 'update',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
 		inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
 		name: 'users',
 		outputs: [
 			{ internalType: 'address', name: 'owner', type: 'address' },
-			{ internalType: 'string', name: 'fullName', type: 'string' },
+			{ internalType: 'string', name: 'fullname', type: 'string' },
 		],
 		stateMutability: 'view',
 		type: 'function',

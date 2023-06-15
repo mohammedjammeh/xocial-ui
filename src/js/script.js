@@ -122,66 +122,13 @@ if (accounts.length == 0) {
 	// let clientAddress = '9826';
 	let storedAccount = allUsers.find((user) => user.owner == clientAddress);
 
-	let fullNameField = document.getElementById('fullName');
-	let musicTasteFields = document.getElementsByName('musicTaste[]');
-	let foodTasteFields = document.getElementsByName('foodTaste[]');
-	let sportsTasteFields = document.getElementsByName('sportsTaste[]');
-
 	if (storedAccount) {
-		fullNameField.value = storedAccount['fullName'];
-
-		musicTasteFields.forEach((field) => {
-			if (storedAccount['musicTaste'].includes(field.value)) {
-				field.checked = true;
-			}
-		});
-
-		// foodTasteFields.forEach((field) => {
-		// 	if (storedAccount['foodTaste'].includes(field.value)) {
-		// 		field.checked = true;
-		// 	}
-		// });
-
-		// sportsTasteFields.forEach((field) => {
-		// 	if (storedAccount['sportsTaste'].includes(field.value)) {
-		// 		field.checked = true;
-		// 	}
-		// });
+		prefillUserForm(storedAccount);
 	} else {
-		profileBtn.children[1].classList.add('dot');
 		setInterval(() => swingAttentionCircle(profileBtn), 800);
 	}
 
-	profileForm.addEventListener('submit', async (event) => {
-		event.preventDefault();
-
-		let selectedMusicTaste = [];
-		musicTasteFields.forEach((field) => {
-			if (field.checked) {
-				selectedMusicTaste.push(field.value);
-			}
-		});
-
-		let selectedFoodTaste = [];
-		foodTasteFields.forEach((field) => {
-			if (field.checked) {
-				selectedFoodTaste.push(field.value);
-			}
-		});
-
-		let selectedSportsTaste = [];
-		sportsTasteFields.forEach((field) => {
-			if (field.checked) {
-				selectedSportsTaste.push(field.value);
-			}
-		});
-
-		// await userContract.create('0x0A2169dfcC633289285290a61BB4d10AFA131817', fullNameField.value, selectedMusicTaste);
-
-		document.getElementsByClassName('profileSaveBtn')[0].classList.add('hide');
-		profileFormLoadingContainer.classList.remove('hide');
-		profileFormLoadingInterval = setInterval(() => shakeLoadingDisplay(profileFormLoadingContainer), 300);
-	});
+	profileForm.addEventListener('submit', async (event) => submitProfileForm(event));
 
 	// contact form
 	let searchBtn = document.querySelectorAll('.search button')[0];
@@ -199,8 +146,8 @@ if (accounts.length == 0) {
 		}
 
 		let searchUsers = allUsers.filter((user) => {
-			// return user.owner !== clientAddress && user.fullName.toLowerCase().includes(searchValue);
-			return user.fullName.toLowerCase().includes(searchValue);
+			// return user.owner !== clientAddress && user.fullname.toLowerCase().includes(searchValue);
+			return user.fullname.toLowerCase().includes(searchValue);
 		});
 
 		if (searchUsers.length == 0) {
@@ -219,7 +166,7 @@ if (accounts.length == 0) {
 
 			let nameElement = document.createElement('p');
 			nameElement.classList.add('name');
-			nameElement.innerHTML = user.fullName;
+			nameElement.innerHTML = user.fullname;
 
 			let addressElement = document.createElement('p');
 			addressElement.classList.add('address');
@@ -281,6 +228,8 @@ function goToView(activeContainer, activeBtn) {
 
 // nav attention
 function swingAttentionCircle(btn) {
+	btn.children[1].classList.add('dot');
+
 	let btnClasses = btn.classList;
 	btnClasses = Object.keys(btnClasses).map((key) => btnClasses[key]);
 
@@ -457,4 +406,48 @@ function shakeLoadingDisplay(loadingContainer) {
 	let nextLoadingElement = loadingContainer.querySelectorAll('.loading span.large + span')[0];
 	nextLoadingElement.classList.add('large');
 	largeLoadingElement.classList.remove('large');
+}
+
+// profile
+function prefillUserForm(user) {
+	document.getElementById('fullname').value = user['fullname'];
+
+	prefillUserFormSelected(user, 'musicTaste');
+	prefillUserFormSelected(user, 'foodTaste');
+	prefillUserFormSelected(user, 'sportsTaste');
+}
+
+function prefillUserFormSelected(user, fieldName) {
+	document.getElementsByName(fieldName + '[]').forEach((field) => {
+		if (user[fieldName].includes(field.value)) {
+			field.checked = true;
+		}
+	});
+}
+
+function submitProfileForm(event) {
+	event.preventDefault();
+
+	let selectedMusicTaste = getSelected('musicTaste');
+	let selectedFoodTaste = getSelected('foodTaste');
+	let selectedSportsTaste = getSelected('sportsTaste');
+
+	console.log(selectedMusicTaste, selectedFoodTaste, selectedSportsTaste);
+
+	// await userContract.create('0x0A2169dfcC633289285290a61BB4d10AFA131817', fullnameField.value, selectedMusicTaste);
+
+	profileFormBtn.classList.add('hide');
+	profileFormLoadingContainer.classList.remove('hide');
+	profileFormLoadingInterval = setInterval(() => shakeLoadingDisplay(profileFormLoadingContainer), 300);
+}
+
+function getSelected(fieldName) {
+	let selected = [];
+	document.getElementsByName(fieldName + '[]').forEach((field) => {
+		if (field.checked) {
+			selected.push(field.value);
+		}
+	});
+
+	return selected;
 }

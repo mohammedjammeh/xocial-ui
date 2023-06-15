@@ -422,15 +422,15 @@ nav ul li a.attention span.dot {
 	font-size: 16px;
 }
 
-#profileForm .fullName {
+#profileForm .fullname {
 	margin-bottom: 5%;
 }
 
-#profileForm .fullName label {
+#profileForm .fullname label {
 	display: block;
 }
 
-#profileForm .fullName input {
+#profileForm .fullname input {
 	width: 100%;
 }
 
