@@ -44,8 +44,8 @@
 							</div>
 
 							<div class="time">
-								<input type="time" id="startTime" name="startTime" value="10:15" class="startTime" />
-								<input type="time" id="endTime" name="endTime" value="12:30" class="endTime" />
+								<input type="time" id="startTime" name="startTime" value="00:00" class="startTime" />
+								<input type="time" id="endTime" name="endTime" value="23:59" class="endTime" />
 							</div>
 						</div>
 
@@ -60,6 +60,16 @@
 
 						<div>
 							<input type="submit" value="Broadcast" />
+
+							<div id="loadingContainer" class="hide">
+								<div class="loading">
+									<div>
+										<span class="large"></span>
+										<span></span>
+										<span class="third"></span>
+									</div>
+								</div>
+							</div>
 						</div>
 					</form>
 
@@ -137,131 +147,7 @@
 			</div>
 
 			<div class="middleColumn">
-				<div id="loadingContainer" class="hide">
-					<div class="loading">
-						<div>
-							<span class="large"></span>
-							<span></span>
-							<span class="third"></span>
-						</div>
-					</div>
-				</div>
-
-				<div class="linkups">
-					<!-- <div class="linkup columnContainer">
-						<p class="type">🎉 🎉 Chilling</p>
-						<p class="location"><i class="fa-solid fa-location-dot"></i> New Town</p>
-						<p class="moment"><i class="fa-regular fa-calendar"></i> Tues 13 Dec, 13:00 - 17:00</p>
-						<p class="description">
-							Come and catch a vibe, you know you want to roll through. Ha ha, I know you do want to come so why long
-							it?
-						</p>
-
-						<ul class="members">
-							<li>John Smith<i class="fa-regular fa-circle-check"></i></li>
-							<li>Mystikal Bowel<i class="fa-regular fa-circle-check"></i></li>
-							<li>Rachael Magic<i class="fa-regular fa-circle-check"></i></li>
-							<li>Mohammed Bass<i class="fa-regular fa-circle-check"></i></li>
-							<li>Bubiski Jallow</li>
-							<li>Magic James</li>
-						</ul>
-
-						<div class="buttons">
-							<div class="broadcastForm">
-								<form action="#">
-									<select name="linkupTo" id="linkupTo">
-										<option value="everyone">Everyone</option>
-										<option value="local">Local</option>
-										<option value="sonko">Buba Sonko</option>
-										<option value="jerry">Malick Jerry</option>
-									</select>
-
-									<input type="submit" value="Broadcast" />
-								</form>
-							</div>
-
-							<div class="joinBtn">
-								<button>Join</button>
-							</div>
-						</div>
-					</div>
-
-					<div class="linkup columnContainer">
-						<p class="type">🎉 🎉 Chilling</p>
-						<p class="location"><i class="fa-solid fa-location-dot"></i> New Town</p>
-						<p class="moment"><i class="fa-regular fa-calendar"></i> Tues 13 Dec, 13:00 - 17:00</p>
-						<p class="description">
-							Come and catch a vibe, you know you want to roll through. Ha ha, I know you do want to come so why long
-							it?
-						</p>
-
-						<ul class="members">
-							<li>John Smith<i class="fa-regular fa-circle-check"></i></li>
-							<li>Mystikal Bowel<i class="fa-regular fa-circle-check"></i></li>
-							<li>Rachael Magic<i class="fa-regular fa-circle-check"></i></li>
-							<li>Mohammed Bass<i class="fa-regular fa-circle-check"></i></li>
-							<li>Bubiski Jallow</li>
-							<li>Magic James</li>
-						</ul>
-
-						<div class="buttons">
-							<div class="broadcastForm">
-								<form action="#">
-									<select name="linkupTo" id="linkupTo">
-										<option value="everyone">Everyone</option>
-										<option value="local">Local</option>
-										<option value="sonko">Buba Sonko</option>
-										<option value="jerry">Malick Jerry</option>
-									</select>
-
-									<input type="submit" value="Broadcast" />
-								</form>
-							</div>
-
-							<div class="joinBtn">
-								<button>Join</button>
-							</div>
-						</div>
-					</div>
-
-					<div class="linkup columnContainer">
-						<p class="type">🎉 🎉 Chilling</p>
-						<p class="location"><i class="fa-solid fa-location-dot"></i> New Town</p>
-						<p class="moment"><i class="fa-regular fa-calendar"></i> Tues 13 Dec, 13:00 - 17:00</p>
-						<p class="description">
-							Come and catch a vibe, you know you want to roll through. Ha ha, I know you do want to come so why long
-							it?
-						</p>
-
-						<ul class="members">
-							<li>John Smith<i class="fa-regular fa-circle-check"></i></li>
-							<li>Mystikal Bowel<i class="fa-regular fa-circle-check"></i></li>
-							<li>Rachael Magic<i class="fa-regular fa-circle-check"></i></li>
-							<li>Mohammed Bass<i class="fa-regular fa-circle-check"></i></li>
-							<li>Bubiski Jallow</li>
-							<li>Magic James</li>
-						</ul>
-
-						<div class="buttons">
-							<div class="broadcastForm">
-								<form action="#">
-									<select name="linkupTo" id="linkupTo">
-										<option value="everyone">Everyone</option>
-										<option value="local">Local</option>
-										<option value="sonko">Buba Sonko</option>
-										<option value="jerry">Malick Jerry</option>
-									</select>
-
-									<input type="submit" value="Broadcast" />
-								</form>
-							</div>
-
-							<div class="joinBtn">
-								<button>Join</button>
-							</div>
-						</div>
-					</div> -->
-				</div>
+				<div class="linkups"></div>
 
 				<div class="user hide">
 					<div class="profile columnContainer">

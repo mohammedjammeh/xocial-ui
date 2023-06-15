@@ -24,25 +24,27 @@ const unconnectedLinkupContract = new ethers.Contract(linkupAddress, linkupABI, 
 const userContract = new ethers.Contract(userContractAddress, userContractABI, windowProvider.getSigner());
 
 // data
-const linkups = accounts.length == 0 ? await unconnectedLinkupContract.getAll() : await linkupContract.getAll();
+let linkups = accounts.length == 0 ? await unconnectedLinkupContract.getAll() : await linkupContract.getAll();
 
 // html elements
-const linkupForm = document.getElementById('linkupForm');
-const profileForm = document.getElementById('profileForm');
+let linkupForm = document.getElementById('linkupForm');
+let linkupFormBtn = document.querySelectorAll('#linkupForm input[type="submit"]')[0];
+let linkupFormLoadingContainer = document.querySelectorAll('#linkupForm #loadingContainer')[0];
+let linkupFormLoadingInterval;
 
-const navBtns = document.querySelectorAll('nav ul li a');
-const homeBtn = document.getElementById('homeBtn');
-const profileBtn = document.getElementById('profileBtn');
-const connectBtn = document.getElementById('connectBtn');
+let profileForm = document.getElementById('profileForm');
 
-const loadingContainer = document.getElementById('loadingContainer');
-const linkupContainer = document.querySelectorAll('.linkups')[0];
-const userContainer = document.querySelectorAll('.user')[0];
+let navBtns = document.querySelectorAll('nav ul li a');
+let homeBtn = document.getElementById('homeBtn');
+let profileBtn = document.getElementById('profileBtn');
+let connectBtn = document.getElementById('connectBtn');
 
-const userSuggestionsBtns = document.querySelectorAll('.userSuggestions button');
+let linkupContainer = document.querySelectorAll('.linkups')[0];
+let userContainer = document.querySelectorAll('.user')[0];
+
+let userSuggestionsBtns = document.querySelectorAll('.userSuggestions button');
 
 // others
-let loadingInterval;
 const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -56,13 +58,24 @@ window.ethereum.on('accountsChanged', async function () {
 wssLinkupContract.on('NewLinkup', (linkup) => {
 	prependLinkUp(linkup);
 
-	loadingContainer.classList.add('hide');
-	clearInterval(loadingInterval);
+	linkupFormLoadingContainer.classList.add('hide');
+	clearInterval(linkupFormLoadingInterval);
+
+	linkupFormBtn.classList.remove('hide');
+
+	document.getElementById('type').value = 'chill';
+	document.getElementById('description').value = '';
+	document.getElementById('location').value = '';
+	document.getElementById('startDate').value = getTodayDate();
+	document.getElementById('startTime').value = '00:00';
+	document.getElementById('endTime').value = '23:59';
 });
 
 /******************
 	Application
 ******************/
+// general
+document.getElementById('startDate').value = getTodayDate();
 
 // unconnected
 if (accounts.length == 0) {
@@ -123,9 +136,10 @@ if (accounts.length == 0) {
 		let startTimeUnix = Date.parse(startDate + ' ' + startTime + ':00') / 1000;
 		let endTimeUnix = Date.parse(startDate + ' ' + endTime + ':00') / 1000;
 
-		loadingContainer.classList.remove('hide');
+		linkupFormBtn.classList.add('hide');
 
-		loadingInterval = setInterval(() => shakeLoadingDisplay(), 300);
+		linkupFormLoadingContainer.classList.remove('hide');
+		linkupFormLoadingInterval = setInterval(() => shakeLoadingDisplay(), 300);
 
 		await linkupContract.create(
 			'0x0A2169dfcC633289285290a61BB4d10AFA131817',
@@ -178,11 +192,7 @@ if (accounts.length == 0) {
 			}
 		});
 
-		const response = await userContract.create(
-			'0x0A2169dfcC633289285290a61BB4d10AFA131817',
-			fullNameField.value,
-			selectedMusicTaste
-		);
+		await userContract.create('0x0A2169dfcC633289285290a61BB4d10AFA131817', fullNameField.value, selectedMusicTaste);
 	});
 
 	// contact form
@@ -250,10 +260,21 @@ if (accounts.length == 0) {
 /******************
 	Functions
 ******************/
-// connect
+// general
 async function connect() {
 	await window.ethereum.request({ method: 'eth_requestAccounts' });
 	connectBtn.classList.add('hide');
+}
+
+function getTodayDate() {
+	const today = new Date();
+	let mm = today.getMonth() + 1; // Months start at 0!
+	let dd = today.getDate();
+
+	if (dd < 10) dd = '0' + dd;
+	if (mm < 10) mm = '0' + mm;
+
+	return today.getFullYear() + '-' + mm + '-' + dd;
 }
 
 // nav attention
