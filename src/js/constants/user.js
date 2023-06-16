@@ -1,16 +1,6 @@
-export const userContractAddress = '0x36e0BED30c800062102517Ad06b0dF2AA0C4E33E';
+export const userContractAddress = '0xeA00499a977fae6f8C2613FEB5a726712379767a';
 
 export const userContractABI = [
-	{
-		inputs: [
-			{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
-			{ internalType: 'uint256', name: 'contact_id', type: 'uint256' },
-		],
-		name: 'addLink',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
-	},
 	{
 		inputs: [],
 		name: 'count',
@@ -20,14 +10,13 @@ export const userContractABI = [
 	},
 	{
 		inputs: [
-			{ internalType: 'address', name: '_owner', type: 'address' },
 			{ internalType: 'string', name: '_fullname', type: 'string' },
 			{ internalType: 'string[]', name: '_musicTaste', type: 'string[]' },
 			{ internalType: 'string[]', name: '_foodTaste', type: 'string[]' },
 			{ internalType: 'string[]', name: '_sportsTaste', type: 'string[]' },
 		],
 		name: 'create',
-		outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+		outputs: [],
 		stateMutability: 'nonpayable',
 		type: 'function',
 	},
@@ -42,7 +31,6 @@ export const userContractABI = [
 					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
 					{ internalType: 'string[]', name: 'foodTaste', type: 'string[]' },
 					{ internalType: 'string[]', name: 'sportsTaste', type: 'string[]' },
-					{ internalType: 'uint256[]', name: 'contacts', type: 'uint256[]' },
 				],
 				internalType: 'struct User.UserStruct[]',
 				name: '',

@@ -115,6 +115,7 @@ if (!isConnected()) {
 } else {
 	let users = await userContract.getAll();
 	let user = users.find((u) => u.owner == clientAddress);
+	let userID = parseInt(Object.keys(users).find((key) => users[key].owner == clientAddress));
 
 	// nav
 	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
@@ -129,7 +130,7 @@ if (!isConnected()) {
 		prefillUserForm(user);
 		disableUserForm();
 		profileFormEditBtn.addEventListener('click', () => enableUserForm());
-		profileFormUpdateBtn.addEventListener('click', () => updateUser());
+		profileFormUpdateBtn.addEventListener('click', () => updateUser(userID));
 		profileFormCancelBtn.addEventListener('click', () => disableUserForm());
 	} else {
 		setInterval(() => swingAttentionCircle(profileBtn), 800);
@@ -400,26 +401,22 @@ function enableUserForm() {
 	profileFormCancelBtn.classList.remove('hide');
 }
 
-async function updateUser() {
-	console.log('update yoooo');
+async function updateUser(userID) {
+	await userContract.update(
+		userID,
+		document.getElementById('fullname').value,
+		getSelected('musicTaste'),
+		getSelected('foodTaste'),
+		getSelected('sportsTaste')
+	);
 
-	// await userContract.create(
-	// 	'0x0A2169dfcC633289285290a61BB4d10AFA131817',
-	// 	document.getElementById('fullname').value,
-	// 	getSelected('musicTaste'),
-	// 	getSelected('foodTaste'),
-	// 	getSelected('sportsTaste')
-	// );
-
-	// replaceButtonWithLoading(profileFormSaveBtn, profileFormLoadingContainer);
-	// profileFormLoadingInterval = setInterval(() => bounceLoading(profileFormLoadingContainer), 300);
-
-	// console.log(clientAddress);
+	profileFormCancelBtn.classList.add('hide');
+	replaceButtonWithLoading(profileFormUpdateBtn, profileFormLoadingContainer);
+	profileFormLoadingInterval = setInterval(() => bounceLoading(profileFormLoadingContainer), 300);
 }
 
 async function createUser() {
 	await userContract.create(
-		clientAddress,
 		document.getElementById('fullname').value,
 		getSelected('musicTaste'),
 		getSelected('foodTaste'),
