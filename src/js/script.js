@@ -14,27 +14,32 @@ if (typeof window.ethereum == 'undefined') {
 const windowProvider = new ethers.providers.Web3Provider(window.ethereum);
 const wssProvider = new ethers.providers.WebSocketProvider(sepoliaRpcWss);
 
-// account
-const accounts = await windowProvider.listAccounts();
-
 // contracts
 const linkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvider.getSigner());
 const wssLinkupContract = new ethers.Contract(linkupAddress, linkupABI, wssProvider.getSigner());
 const unconnectedLinkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvider);
 const userContract = new ethers.Contract(userContractAddress, userContractABI, windowProvider.getSigner());
 
+// account
+let accounts = await windowProvider.listAccounts();
+let clientAddress = accounts[0] ?? null;
+// let clientAddress = '9826';
+
 // data
-let linkups = accounts.length == 0 ? await unconnectedLinkupContract.getAll() : await linkupContract.getAll();
+let linkups = isConnected() ? await linkupContract.getAll() : await unconnectedLinkupContract.getAll();
 
 // html elements
 let linkupForm = document.getElementById('linkupForm');
-let linkupFormBtn = document.querySelectorAll('#linkupForm input[type="submit"]')[0];
-let linkupFormLoadingContainer = document.querySelectorAll('#linkupForm #loadingContainer')[0];
+let linkupFormBtn = linkupForm.querySelector('input[type="submit"]');
+let linkupFormLoadingContainer = linkupForm.querySelector('#loadingContainer');
 let linkupFormLoadingInterval;
 
 let profileForm = document.getElementById('profileForm');
-let profileFormBtn = document.querySelectorAll('#profileForm input[type="submit"]')[0];
-let profileFormLoadingContainer = document.querySelectorAll('#profileForm #loadingContainer')[0];
+let profileFormSaveBtn = profileForm.querySelector('#saveBtn');
+let profileFormEditBtn = profileForm.querySelector('#editBtn');
+let profileFormUpdateBtn = profileForm.querySelector('#updateBtn');
+let profileFormCancelBtn = profileForm.querySelector('#cancelBtn');
+let profileFormLoadingContainer = profileForm.querySelector('#loadingContainer');
 let profileFormLoadingInterval;
 
 let navBtns = document.querySelectorAll('nav ul li a');
@@ -79,7 +84,13 @@ wssLinkupContract.on('NewLinkup', (linkup) => {
 ******************/
 document.getElementById('startDate').value = getTodayDate();
 
-if (accounts.length == 0) {
+let allButtons = document.querySelectorAll('button');
+let allForms = document.querySelectorAll('form');
+
+allButtons.forEach((btn) => [btn.addEventListener('click', (event) => event.preventDefault())]);
+allForms.forEach((form) => [form.addEventListener('submit', (event) => event.preventDefault())]);
+
+if (!isConnected()) {
 	// nav
 	navBtns.forEach((btn) => btn.addEventListener('click', connect));
 
@@ -90,24 +101,21 @@ if (accounts.length == 0) {
 	userSuggestionsBtns.forEach((btn) => btn.addEventListener('click', connect));
 
 	// linkup
-	linkupForm.addEventListener('submit', (event) => {
-		event.preventDefault();
-		connect();
-	});
+	linkupForm.addEventListener('submit', () => connect());
 
 	linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	let broadcastForms = document.querySelectorAll('.broadcastForm form');
 	broadcastForms.forEach((form) => {
-		form.addEventListener('submit', (event) => {
-			event.preventDefault();
-			connect();
-		});
+		form.addEventListener('submit', () => connect());
 	});
 
 	let joinBtns = document.querySelectorAll('.linkup .joinBtn button');
 	joinBtns.forEach((btn) => btn.addEventListener('click', connect));
 } else {
+	let users = await userContract.getAll();
+	let user = users.find((u) => u.owner == clientAddress);
+
 	// nav
 	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
 	profileBtn.addEventListener('click', () => goToView(userContainer, profileBtn));
@@ -117,27 +125,23 @@ if (accounts.length == 0) {
 	linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	// profile
-	let allUsers = await userContract.getAll();
-	let clientAddress = accounts[0];
-	// let clientAddress = '9826';
-	let storedAccount = allUsers.find((user) => user.owner == clientAddress);
-
-	if (storedAccount) {
-		prefillUserForm(storedAccount);
+	if (user) {
+		prefillUserForm(user);
+		disableUserForm();
+		profileFormEditBtn.addEventListener('click', () => enableUserForm());
+		profileFormUpdateBtn.addEventListener('click', () => updateUser());
+		profileFormCancelBtn.addEventListener('click', () => disableUserForm());
 	} else {
 		setInterval(() => swingAttentionCircle(profileBtn), 800);
+		profileFormSaveBtn.addEventListener('click', () => createUser());
 	}
-
-	profileForm.addEventListener('submit', async (event) => submitProfileForm(event));
 
 	// contact form
 	let searchBtn = document.querySelectorAll('.search button')[0];
 	let searchField = document.querySelectorAll('.search input')[0];
 	let searchContainer = document.querySelectorAll('.contacts .search + .list')[0];
 
-	searchBtn.addEventListener('click', async (event) => {
-		event.preventDefault();
-
+	searchBtn.addEventListener('click', async () => {
 		let searchValue = searchField.value.toLowerCase();
 		searchContainer.innerHTML = '';
 
@@ -145,7 +149,7 @@ if (accounts.length == 0) {
 			return;
 		}
 
-		let searchUsers = allUsers.filter((user) => {
+		let searchUsers = users.filter((user) => {
 			// return user.owner !== clientAddress && user.fullname.toLowerCase().includes(searchValue);
 			return user.fullname.toLowerCase().includes(searchValue);
 		});
@@ -195,37 +199,6 @@ if (accounts.length == 0) {
 /******************
 	Functions
 ******************/
-// general
-async function connect() {
-	await window.ethereum.request({ method: 'eth_requestAccounts' });
-	connectBtn.classList.add('hide');
-}
-
-function getTodayDate() {
-	const today = new Date();
-	let mm = today.getMonth() + 1;
-	let dd = today.getDate();
-
-	if (dd < 10) dd = '0' + dd;
-	if (mm < 10) mm = '0' + mm;
-
-	return today.getFullYear() + '-' + mm + '-' + dd;
-}
-
-function goToView(activeContainer, activeBtn) {
-	let parentContainers = document.getElementsByClassName('middleColumn')[0].children;
-	for (let key in parentContainers) {
-		if (parentContainers.hasOwnProperty(key)) {
-			parentContainers[key].classList.add('hide');
-		}
-	}
-
-	activeContainer.classList.remove('hide');
-
-	navBtns.forEach((btn) => btn.classList.remove('active'));
-	activeBtn.classList.add('active');
-}
-
 // nav attention
 function swingAttentionCircle(btn) {
 	btn.children[1].classList.add('dot');
@@ -253,10 +226,8 @@ async function createLinkup(event) {
 	let startTimeUnix = Date.parse(startDate + ' ' + startTime + ':00') / 1000;
 	let endTimeUnix = Date.parse(startDate + ' ' + endTime + ':00') / 1000;
 
-	linkupFormBtn.classList.add('hide');
-
-	linkupFormLoadingContainer.classList.remove('hide');
-	linkupFormLoadingInterval = setInterval(() => shakeLoadingDisplay(linkupFormLoadingContainer), 300);
+	replaceButtonWithLoading(linkupFormBtn, linkupFormLoadingContainer);
+	linkupFormLoadingInterval = setInterval(() => bounceLoading(linkupFormLoadingContainer), 300);
 
 	await linkupContract.create(
 		'0x0A2169dfcC633289285290a61BB4d10AFA131817',
@@ -391,23 +362,6 @@ function formatMoment(linkup) {
 	);
 }
 
-function shakeLoadingDisplay(loadingContainer) {
-	let largeLoadingElement = loadingContainer.querySelectorAll('.loading span.large')[0];
-
-	if (largeLoadingElement.classList.contains('third')) {
-		largeLoadingElement.classList.remove('large');
-
-		let firstLoadingSpan = loadingContainer.querySelectorAll('.loading span:first-of-type')[0];
-		firstLoadingSpan.classList.add('large');
-
-		return;
-	}
-
-	let nextLoadingElement = loadingContainer.querySelectorAll('.loading span.large + span')[0];
-	nextLoadingElement.classList.add('large');
-	largeLoadingElement.classList.remove('large');
-}
-
 // profile
 function prefillUserForm(user) {
 	document.getElementById('fullname').value = user['fullname'];
@@ -425,20 +379,60 @@ function prefillUserFormSelected(user, fieldName) {
 	});
 }
 
-function submitProfileForm(event) {
-	event.preventDefault();
+function disableUserForm() {
+	profileForm.querySelectorAll('input:not(.regularBtn)').forEach((formField) => {
+		formField.disabled = true;
+	});
 
-	let selectedMusicTaste = getSelected('musicTaste');
-	let selectedFoodTaste = getSelected('foodTaste');
-	let selectedSportsTaste = getSelected('sportsTaste');
+	profileFormEditBtn.classList.remove('hide');
+	profileFormSaveBtn.classList.add('hide');
+	profileFormUpdateBtn.classList.add('hide');
+	profileFormCancelBtn.classList.add('hide');
+}
 
-	console.log(selectedMusicTaste, selectedFoodTaste, selectedSportsTaste);
+function enableUserForm() {
+	profileForm.querySelectorAll('input:not(.regularBtn)').forEach((formField) => {
+		formField.disabled = false;
+	});
 
-	// await userContract.create('0x0A2169dfcC633289285290a61BB4d10AFA131817', fullnameField.value, selectedMusicTaste);
+	profileFormEditBtn.classList.add('hide');
+	profileFormUpdateBtn.classList.remove('hide');
+	profileFormCancelBtn.classList.remove('hide');
+}
 
-	profileFormBtn.classList.add('hide');
-	profileFormLoadingContainer.classList.remove('hide');
-	profileFormLoadingInterval = setInterval(() => shakeLoadingDisplay(profileFormLoadingContainer), 300);
+async function updateUser() {
+	console.log('update yoooo');
+
+	// await userContract.create(
+	// 	'0x0A2169dfcC633289285290a61BB4d10AFA131817',
+	// 	document.getElementById('fullname').value,
+	// 	getSelected('musicTaste'),
+	// 	getSelected('foodTaste'),
+	// 	getSelected('sportsTaste')
+	// );
+
+	// replaceButtonWithLoading(profileFormSaveBtn, profileFormLoadingContainer);
+	// profileFormLoadingInterval = setInterval(() => bounceLoading(profileFormLoadingContainer), 300);
+
+	// console.log(clientAddress);
+}
+
+async function createUser() {
+	await userContract.create(
+		clientAddress,
+		document.getElementById('fullname').value,
+		getSelected('musicTaste'),
+		getSelected('foodTaste'),
+		getSelected('sportsTaste')
+	);
+
+	replaceButtonWithLoading(profileFormSaveBtn, profileFormLoadingContainer);
+	profileFormLoadingInterval = setInterval(() => bounceLoading(profileFormLoadingContainer), 300);
+}
+
+function replaceButtonWithLoading(btn, loadingContainer) {
+	btn.classList.add('hide');
+	loadingContainer.classList.remove('hide');
 }
 
 function getSelected(fieldName) {
@@ -450,4 +444,56 @@ function getSelected(fieldName) {
 	});
 
 	return selected;
+}
+
+// general
+function isConnected() {
+	return accounts.length > 0;
+}
+
+async function connect() {
+	await window.ethereum.request({ method: 'eth_requestAccounts' });
+	connectBtn.classList.add('hide');
+}
+
+function getTodayDate() {
+	const today = new Date();
+	let mm = today.getMonth() + 1;
+	let dd = today.getDate();
+
+	if (dd < 10) dd = '0' + dd;
+	if (mm < 10) mm = '0' + mm;
+
+	return today.getFullYear() + '-' + mm + '-' + dd;
+}
+
+function goToView(activeContainer, activeBtn) {
+	let parentContainers = document.getElementsByClassName('middleColumn')[0].children;
+	for (let key in parentContainers) {
+		if (parentContainers.hasOwnProperty(key)) {
+			parentContainers[key].classList.add('hide');
+		}
+	}
+
+	activeContainer.classList.remove('hide');
+
+	navBtns.forEach((btn) => btn.classList.remove('active'));
+	activeBtn.classList.add('active');
+}
+
+function bounceLoading(loadingContainer) {
+	let largeLoadingElement = loadingContainer.querySelectorAll('.loading span.large')[0];
+
+	if (largeLoadingElement.classList.contains('third')) {
+		largeLoadingElement.classList.remove('large');
+
+		let firstLoadingSpan = loadingContainer.querySelectorAll('.loading span:first-of-type')[0];
+		firstLoadingSpan.classList.add('large');
+
+		return;
+	}
+
+	let nextLoadingElement = loadingContainer.querySelectorAll('.loading span.large + span')[0];
+	nextLoadingElement.classList.add('large');
+	largeLoadingElement.classList.remove('large');
 }
