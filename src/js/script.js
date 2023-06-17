@@ -18,7 +18,9 @@ const wssProvider = new ethers.providers.WebSocketProvider(sepoliaRpcWss);
 const linkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvider.getSigner());
 const wssLinkupContract = new ethers.Contract(linkupAddress, linkupABI, wssProvider.getSigner());
 const unconnectedLinkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvider);
+
 const userContract = new ethers.Contract(userContractAddress, userContractABI, windowProvider.getSigner());
+const wssUserContract = new ethers.Contract(userContractAddress, userContractABI, wssProvider.getSigner());
 
 // account
 let accounts = await windowProvider.listAccounts();
@@ -26,9 +28,14 @@ let clientAddress = accounts[0] ?? null;
 // let clientAddress = '9826';
 
 // data
+let users;
+let user;
+let userID;
 let linkups = isConnected() ? await linkupContract.getAll() : await unconnectedLinkupContract.getAll();
 
 // html elements
+let profileNavAttentionInterval;
+
 let linkupForm = document.getElementById('linkupForm');
 let linkupFormBtn = linkupForm.querySelector('input[type="submit"]');
 let linkupFormLoadingContainer = linkupForm.querySelector('#loadingContainer');
@@ -79,6 +86,26 @@ wssLinkupContract.on('NewLinkup', (linkup) => {
 	document.getElementById('endTime').value = '23:59';
 });
 
+wssUserContract.on('UserCreated', (u, id) => {
+	profileBtn.children[1].classList.remove('dot');
+	clearInterval(profileNavAttentionInterval);
+
+	users[id.toString()] = u;
+
+	users = users.filter((value) => Object.keys(value).length !== 0);
+
+	buildPage(users);
+});
+
+wssUserContract.on('UserUpdated', (u) => {
+	profileFormLoadingContainer.classList.add('hide');
+	clearInterval(profileFormLoadingInterval);
+
+	users[userID] = u;
+
+	buildPage(users);
+});
+
 /******************
 	Application
 ******************/
@@ -113,9 +140,16 @@ if (!isConnected()) {
 	let joinBtns = document.querySelectorAll('.linkup .joinBtn button');
 	joinBtns.forEach((btn) => btn.addEventListener('click', connect));
 } else {
-	let users = await userContract.getAll();
-	let user = users.find((u) => u.owner == clientAddress);
-	let userID = parseInt(Object.keys(users).find((key) => users[key].owner == clientAddress));
+	users = await userContract.getAll();
+	users = [...users];
+	// users = [];
+
+	buildPage(users);
+}
+
+async function buildPage(users) {
+	user = users.find((u) => u.owner == clientAddress);
+	userID = parseInt(Object.keys(users).find((key) => users[key].owner == clientAddress));
 
 	// nav
 	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
@@ -128,12 +162,15 @@ if (!isConnected()) {
 	// profile
 	if (user) {
 		prefillUserForm(user);
-		disableUserForm();
+		disableUserFormExcept(profileFormEditBtn);
 		profileFormEditBtn.addEventListener('click', () => enableUserForm());
-		profileFormUpdateBtn.addEventListener('click', () => updateUser(userID));
-		profileFormCancelBtn.addEventListener('click', () => disableUserForm());
+		profileFormUpdateBtn.addEventListener('click', () => {
+			updateUser(userID);
+			disableUserFormExcept();
+		});
+		profileFormCancelBtn.addEventListener('click', () => disableUserFormExcept(profileFormEditBtn));
 	} else {
-		setInterval(() => swingAttentionCircle(profileBtn), 800);
+		profileNavAttentionInterval = setInterval(() => swingAttentionCircle(profileBtn), 800);
 		profileFormSaveBtn.addEventListener('click', () => createUser());
 	}
 
@@ -196,7 +233,6 @@ if (!isConnected()) {
 		});
 	});
 }
-
 /******************
 	Functions
 ******************/
@@ -380,15 +416,18 @@ function prefillUserFormSelected(user, fieldName) {
 	});
 }
 
-function disableUserForm() {
+function disableUserFormExcept(expectBtn) {
 	profileForm.querySelectorAll('input:not(.regularBtn)').forEach((formField) => {
 		formField.disabled = true;
 	});
 
-	profileFormEditBtn.classList.remove('hide');
-	profileFormSaveBtn.classList.add('hide');
-	profileFormUpdateBtn.classList.add('hide');
-	profileFormCancelBtn.classList.add('hide');
+	profileForm.querySelectorAll('button').forEach((button) => {
+		button.classList.add('hide');
+	});
+
+	if (expectBtn) {
+		expectBtn.classList.remove('hide');
+	}
 }
 
 function enableUserForm() {

@@ -1,6 +1,47 @@
-export const userContractAddress = '0xeA00499a977fae6f8C2613FEB5a726712379767a';
+export const userContractAddress = '0x0C0530f807fEeEF09b4b03008F0d825c74e872C8';
 
 export const userContractABI = [
+	{
+		anonymous: false,
+		inputs: [
+			{
+				components: [
+					{ internalType: 'address', name: 'owner', type: 'address' },
+					{ internalType: 'string', name: 'fullname', type: 'string' },
+					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
+					{ internalType: 'string[]', name: 'foodTaste', type: 'string[]' },
+					{ internalType: 'string[]', name: 'sportsTaste', type: 'string[]' },
+				],
+				indexed: false,
+				internalType: 'struct User.UserStruct',
+				name: 'user',
+				type: 'tuple',
+			},
+			{ indexed: false, internalType: 'uint256', name: 'id', type: 'uint256' },
+		],
+		name: 'UserCreated',
+		type: 'event',
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				components: [
+					{ internalType: 'address', name: 'owner', type: 'address' },
+					{ internalType: 'string', name: 'fullname', type: 'string' },
+					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
+					{ internalType: 'string[]', name: 'foodTaste', type: 'string[]' },
+					{ internalType: 'string[]', name: 'sportsTaste', type: 'string[]' },
+				],
+				indexed: false,
+				internalType: 'struct User.UserStruct',
+				name: 'user',
+				type: 'tuple',
+			},
+		],
+		name: 'UserUpdated',
+		type: 'event',
+	},
 	{
 		inputs: [],
 		name: 'count',
