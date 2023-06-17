@@ -494,17 +494,25 @@ nav ul li a.attention span.dot {
 
 .contacts .list p.name {
 	width: 35%;
+	margin-right: 2%;
 }
 
 .contacts .list p.address {
-	width: 55%;
+	width: 48%;
 	color: #666;
 }
 
 .contacts .list .removeBtnContainer {
 	width: 5%;
-	margin: 0 0 0;
+	margin: 0.5px 0 0;
 	float: right;
+}
+
+.contacts .list #loadingContainer {
+	width: 12%;
+	/* margin: 1% 0 0; */
+	float: right;
+	padding: 6.5px 0 0.5px;
 }
 
 .contacts .list button {

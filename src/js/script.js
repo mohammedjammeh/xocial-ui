@@ -1,7 +1,8 @@
 import { ethers } from './ethers-5.1.esm.min.js';
 import { sepoliaRpcWss } from './constants/config.js';
 import { linkupAddress, linkupABI } from './constants/linkup.js';
-import { userContractAddress, userContractABI } from './constants/user.js';
+import { userAddress, userABI } from './constants/user.js';
+import { userContactAddress, userContactABI } from './constants/UserContact.js';
 
 if (typeof window.ethereum == 'undefined') {
 	throw new Error('Please install Metamask!');
@@ -19,8 +20,11 @@ const linkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvi
 const wssLinkupContract = new ethers.Contract(linkupAddress, linkupABI, wssProvider.getSigner());
 const unconnectedLinkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvider);
 
-const userContract = new ethers.Contract(userContractAddress, userContractABI, windowProvider.getSigner());
-const wssUserContract = new ethers.Contract(userContractAddress, userContractABI, wssProvider.getSigner());
+const userContract = new ethers.Contract(userAddress, userABI, windowProvider.getSigner());
+const wssUserContract = new ethers.Contract(userAddress, userABI, wssProvider.getSigner());
+
+const userContactContract = new ethers.Contract(userContactAddress, userContactABI, windowProvider.getSigner());
+const wssUserContactContract = new ethers.Contract(userContactAddress, userContactABI, wssProvider.getSigner());
 
 // account
 let accounts = await windowProvider.listAccounts();
@@ -34,13 +38,19 @@ let userID;
 let linkups = isConnected() ? await linkupContract.getAll() : await unconnectedLinkupContract.getAll();
 
 // html elements
+let navBtns = document.querySelectorAll('nav ul li a');
+let homeBtn = document.getElementById('homeBtn');
+let profileBtn = document.getElementById('profileBtn');
+let connectBtn = document.getElementById('connectBtn');
 let profileNavAttentionInterval;
 
+let linkupContainer = document.querySelectorAll('.linkups')[0];
 let linkupForm = document.getElementById('linkupForm');
 let linkupFormBtn = linkupForm.querySelector('input[type="submit"]');
 let linkupFormLoadingContainer = linkupForm.querySelector('#loadingContainer');
 let linkupFormLoadingInterval;
 
+let userContainer = document.querySelectorAll('.user')[0];
 let profileForm = document.getElementById('profileForm');
 let profileFormSaveBtn = profileForm.querySelector('#saveBtn');
 let profileFormEditBtn = profileForm.querySelector('#editBtn');
@@ -49,13 +59,10 @@ let profileFormCancelBtn = profileForm.querySelector('#cancelBtn');
 let profileFormLoadingContainer = profileForm.querySelector('#loadingContainer');
 let profileFormLoadingInterval;
 
-let navBtns = document.querySelectorAll('nav ul li a');
-let homeBtn = document.getElementById('homeBtn');
-let profileBtn = document.getElementById('profileBtn');
-let connectBtn = document.getElementById('connectBtn');
-
-let linkupContainer = document.querySelectorAll('.linkups')[0];
-let userContainer = document.querySelectorAll('.user')[0];
+let contactSearchBtn = document.querySelectorAll('.search button')[0];
+let contactSearchField = document.querySelectorAll('.search input')[0];
+let contactSearchList = document.querySelectorAll('.contacts .search + .list')[0];
+let addContactLoadingIntervals = [];
 
 let userSuggestionsBtns = document.querySelectorAll('.userSuggestions button');
 
@@ -96,6 +103,11 @@ wssUserContract.on('UserCreated', (u, id) => {
 
 	buildPage(users);
 });
+
+let filter = {
+	address: '0x0A2169dfcC633289285290a61BB4d10AFA131817',
+	topics: [utils.id('UserUpdated(user)'), hexZeroPad(myAddress, 32)],
+};
 
 wssUserContract.on('UserUpdated', (u) => {
 	profileFormLoadingContainer.classList.add('hide');
@@ -142,7 +154,6 @@ if (!isConnected()) {
 } else {
 	users = await userContract.getAll();
 	users = [...users];
-	// users = [];
 
 	buildPage(users);
 }
@@ -174,65 +185,103 @@ async function buildPage(users) {
 		profileFormSaveBtn.addEventListener('click', () => createUser());
 	}
 
-	// contact form
-	let searchBtn = document.querySelectorAll('.search button')[0];
-	let searchField = document.querySelectorAll('.search input')[0];
-	let searchContainer = document.querySelectorAll('.contacts .search + .list')[0];
+	// contact
+	contactSearchBtn.addEventListener('click', () => search());
+}
 
-	searchBtn.addEventListener('click', async () => {
-		let searchValue = searchField.value.toLowerCase();
-		searchContainer.innerHTML = '';
+function search() {
+	let searchValue = contactSearchField.value.toLowerCase();
+	contactSearchList.innerHTML = '';
 
-		if (searchValue === '') {
-			return;
-		}
+	if (searchValue === '') {
+		return;
+	}
 
-		let searchUsers = users.filter((user) => {
-			// return user.owner !== clientAddress && user.fullname.toLowerCase().includes(searchValue);
-			return user.fullname.toLowerCase().includes(searchValue);
-		});
+	let searchUsers = users.filter((user) => {
+		// return user.owner !== clientAddress && user.fullname.toLowerCase().includes(searchValue);
+		return user.fullname.toLowerCase().includes(searchValue);
+	});
 
-		if (searchUsers.length == 0) {
-			let messageContainer = document.createElement('div');
-			let messageElement = document.createElement('p');
-			messageElement.innerHTML = `There are no users with the name or address: ${searchValue}.`;
+	if (searchUsers.length == 0) {
+		let messageContainer = document.createElement('div');
+		let messageElement = document.createElement('p');
+		messageElement.innerHTML = `There are no users with the name or address: ${searchValue}.`;
 
-			messageContainer.append(messageElement);
-			searchContainer.append(messageContainer);
+		messageContainer.append(messageElement);
+		contactSearchList.append(messageContainer);
 
-			return;
-		}
+		return;
+	}
 
-		searchUsers.forEach((user) => {
-			let searchElement = document.createElement('div');
+	searchUsers.forEach((user) => buildcontactSearchList(user));
+}
 
-			let nameElement = document.createElement('p');
-			nameElement.classList.add('name');
-			nameElement.innerHTML = user.fullname;
+function buildcontactSearchList(user) {
+	let searchItem = document.createElement('div');
 
-			let addressElement = document.createElement('p');
-			addressElement.classList.add('address');
-			addressElement.innerHTML = user.owner;
+	// name
+	let nameElement = document.createElement('p');
+	nameElement.classList.add('name');
+	nameElement.innerHTML = user.fullname;
+	// nameElement.innerHTML = 'Alhajie Bakary Jammeh Jilanka';
 
-			let btnContainer = document.createElement('div');
-			btnContainer.classList.add('removeBtnContainer');
+	// address
+	let addressElement = document.createElement('p');
+	addressElement.classList.add('address');
+	addressElement.innerHTML = user.owner;
 
-			let btnElement = document.createElement('button');
+	// add
+	let btnContainer = document.createElement('div');
+	btnContainer.classList.add('removeBtnContainer');
 
-			let btnIconElement = document.createElement('i');
-			btnIconElement.classList.add('fa-solid');
-			btnIconElement.classList.add('fa-circle-plus');
+	let btnElement = document.createElement('button');
+	let btnIconElement = document.createElement('i');
+	btnIconElement.classList.add('fa-solid');
+	btnIconElement.classList.add('fa-circle-plus');
 
-			btnElement.append(btnIconElement);
-			btnContainer.append(btnElement);
+	//loading
+	let addLoadingContainer = document.createElement('div');
+	addLoadingContainer.classList.add('hide');
+	addLoadingContainer.setAttribute('id', 'loadingContainer');
 
-			searchElement.append(nameElement);
-			searchElement.append(addressElement);
-			searchElement.append(btnContainer);
-			searchContainer.append(searchElement);
-		});
+	let loadingElement = document.createElement('div');
+	loadingElement.classList.add('loading');
+
+	let innerLoadingElement = document.createElement('div');
+	let firstCircle = document.createElement('span');
+	let middleCircle = document.createElement('span');
+	let lastCircle = document.createElement('span');
+	firstCircle.classList.add('large');
+	lastCircle.classList.add('third');
+
+	// append
+	addLoadingContainer.append(loadingElement);
+	loadingElement.append(innerLoadingElement);
+
+	innerLoadingElement.append(firstCircle);
+	innerLoadingElement.append(middleCircle);
+	innerLoadingElement.append(lastCircle);
+
+	btnElement.append(btnIconElement);
+	btnContainer.append(btnElement);
+
+	searchItem.append(nameElement);
+	searchItem.append(addressElement);
+	searchItem.append(btnContainer);
+	searchItem.append(addLoadingContainer);
+	contactSearchList.append(searchItem);
+
+	// event listener
+	btnElement.addEventListener('click', async () => {
+		btnContainer.classList.add('hide');
+		addLoadingContainer.classList.remove('hide');
+
+		addContactLoadingIntervals[userID] = setInterval(() => bounceLoading(addLoadingContainer), 300);
+
+		await userContactContract.create(0, 1);
 	});
 }
+
 /******************
 	Functions
 ******************/
