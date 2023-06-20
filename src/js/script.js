@@ -70,6 +70,7 @@ let contactSearchField = document.querySelectorAll('.search input')[0];
 let contactSearchList = document.querySelectorAll('.contacts .search + .list')[0];
 let addContactLoadings = [];
 
+let userSuggestionsContainer = document.querySelectorAll('.userSuggestions')[0];
 let userSuggestionsBtns = document.querySelectorAll('.userSuggestions button');
 
 // others
@@ -187,14 +188,6 @@ async function buildPage(users) {
 	user = users.find((u) => u.owner == clientAddress);
 	userID = getUserID(clientAddress);
 
-	// let userContactID = Object.keys(userContacts).find((key) => {
-	// 	return (
-	// 		userContact.user_id.toNumber() == userID && userContacts[key].contact_id.toNumber() == 2
-	// 	);
-	// });
-
-	// console.log(userContactID);
-
 	// nav
 	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
 	profileBtn.addEventListener('click', () => goToView(userContainer, profileBtn));
@@ -229,6 +222,73 @@ async function buildPage(users) {
 	});
 
 	contactSearchBtn.addEventListener('click', () => search());
+
+	// user suggestions
+	let activeContactIDs = getActiveContactIDs();
+	let contactSuggestions = users.filter((suggestion, id) => {
+		// return !activeContactIDs.includes(id) && suggestion.owner !== clientAddress;
+		return !activeContactIDs.includes(id);
+	});
+
+	contactSuggestions.forEach((suggestion) => {
+		let suggestionElement = document.createElement('div');
+
+		let infoElement = document.createElement('div');
+		infoElement.classList.add('info');
+
+		let nameElement = document.createElement('p');
+		nameElement.innerHTML = suggestion.fullname;
+
+		let addressElement = document.createElement('p');
+		addressElement.innerHTML = suggestion.owner;
+
+		let saveBtn = document.createElement('button');
+		saveBtn.innerHTML = 'Save';
+
+		let suggestionLoadingContainer = document.createElement('div');
+		// suggestionLoadingContainer.classList.add('hide');
+		suggestionLoadingContainer.setAttribute('id', 'loadingContainer');
+
+		let loadingElement = document.createElement('div');
+		loadingElement.classList.add('loading');
+
+		let innerLoadingElement = document.createElement('div');
+		let firstCircle = document.createElement('span');
+		let middleCircle = document.createElement('span');
+		let lastCircle = document.createElement('span');
+		firstCircle.classList.add('large');
+		lastCircle.classList.add('third');
+
+		userSuggestionsContainer.append(suggestionElement);
+		suggestionElement.append(infoElement);
+		suggestionElement.append(saveBtn);
+		suggestionElement.append(suggestionLoadingContainer);
+
+		infoElement.append(nameElement);
+		infoElement.append(addressElement);
+
+		suggestionLoadingContainer.append(loadingElement);
+		loadingElement.append(innerLoadingElement);
+		innerLoadingElement.append(firstCircle);
+		innerLoadingElement.append(middleCircle);
+		innerLoadingElement.append(lastCircle);
+
+		// event listener
+		saveBtn.addEventListener('click', async () => {
+			// let contactID = getUserID(contact.owner);
+			let contactID = parseInt(Object.keys(users).find((key) => users[key].fullname == 'J hhh'));
+
+			saveBtn.classList.add('hide');
+			// addLoadingContainer.classList.remove('hide');
+
+			// addContactLoadings[contactID] = {
+			// 	interval: setInterval(() => bounceLoading(addLoadingContainer), 300),
+			// 	element: searchItem,
+			// };
+
+			// await userContactContract.create(userID, contactID);
+		});
+	});
 }
 
 function search() {
@@ -239,9 +299,13 @@ function search() {
 		return;
 	}
 
-	let searchUsers = users.filter((user) => {
-		// return user.owner !== clientAddress && user.fullname.toLowerCase().includes(searchValue);
-		return user.fullname.toLowerCase().includes(searchValue);
+	let activeContactIDs = getActiveContactIDs();
+
+	let searchUsers = users.filter((searchUser) => {
+		return (
+			searchUser.fullname.toLowerCase().includes(searchValue) &&
+			!activeContactIDs.includes(getUserID(searchUser.owner))
+		);
 	});
 
 	if (searchUsers.length == 0) {
@@ -256,6 +320,18 @@ function search() {
 	}
 
 	searchUsers.forEach((user) => buildContactSearchList(user));
+}
+
+function getActiveContactIDs() {
+	return userContacts
+		.map((userContact) => {
+			if (!userContact.active) {
+				return;
+			}
+
+			return userContact.contact_id.toNumber();
+		})
+		.filter((userContact) => userContact != undefined);
 }
 
 function buildContactList(contact) {
