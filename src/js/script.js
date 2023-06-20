@@ -13,18 +13,20 @@ if (typeof window.ethereum == 'undefined') {
 ******************/
 // providers
 const windowProvider = new ethers.providers.Web3Provider(window.ethereum);
+const windowSigner = windowProvider.getSigner();
 const wssProvider = new ethers.providers.WebSocketProvider(sepoliaRpcWss);
+const wssSigner = wssProvider.getSigner();
 
 // contracts
-const linkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvider.getSigner());
-const wssLinkupContract = new ethers.Contract(linkupAddress, linkupABI, wssProvider.getSigner());
+const linkupContract = new ethers.Contract(linkupAddress, linkupABI, windowSigner);
+const wssLinkupContract = new ethers.Contract(linkupAddress, linkupABI, wssSigner);
 const unconnectedLinkupContract = new ethers.Contract(linkupAddress, linkupABI, windowProvider);
 
-const userContract = new ethers.Contract(userAddress, userABI, windowProvider.getSigner());
-const wssUserContract = new ethers.Contract(userAddress, userABI, wssProvider.getSigner());
+const userContract = new ethers.Contract(userAddress, userABI, windowSigner);
+const wssUserContract = new ethers.Contract(userAddress, userABI, wssSigner);
 
-const userContactContract = new ethers.Contract(userContactAddress, userContactABI, windowProvider.getSigner());
-const wssUserContactContract = new ethers.Contract(userContactAddress, userContactABI, wssProvider.getSigner());
+const userContactContract = new ethers.Contract(userContactAddress, userContactABI, windowSigner);
+const wssUserContactContract = new ethers.Contract(userContactAddress, userContactABI, wssSigner);
 
 // account
 let accounts = await windowProvider.listAccounts();
@@ -35,6 +37,7 @@ let clientAddress = accounts[0] ?? null;
 let users;
 let user;
 let userID;
+let userContacts;
 let linkups = isConnected() ? await linkupContract.getAll() : await unconnectedLinkupContract.getAll();
 
 // html elements
@@ -59,10 +62,13 @@ let profileFormCancelBtn = profileForm.querySelector('#cancelBtn');
 let profileFormLoadingContainer = profileForm.querySelector('#loadingContainer');
 let profileFormLoadingInterval;
 
+let contactList = document.querySelectorAll('.contacts .list')[0];
+let removeContactLoadings = [];
+
 let contactSearchBtn = document.querySelectorAll('.search button')[0];
 let contactSearchField = document.querySelectorAll('.search input')[0];
 let contactSearchList = document.querySelectorAll('.contacts .search + .list')[0];
-let addContactLoadingIntervals = [];
+let addContactLoadings = [];
 
 let userSuggestionsBtns = document.querySelectorAll('.userSuggestions button');
 
@@ -104,11 +110,6 @@ wssUserContract.on('UserCreated', (u, id) => {
 	buildPage(users);
 });
 
-let filter = {
-	address: '0x0A2169dfcC633289285290a61BB4d10AFA131817',
-	topics: [utils.id('UserUpdated(user)'), hexZeroPad(myAddress, 32)],
-};
-
 wssUserContract.on('UserUpdated', (u) => {
 	profileFormLoadingContainer.classList.add('hide');
 	clearInterval(profileFormLoadingInterval);
@@ -117,6 +118,28 @@ wssUserContract.on('UserUpdated', (u) => {
 
 	buildPage(users);
 });
+
+wssUserContactContract.on(
+	wssUserContactContract.filters.UserContactCreated(clientAddress),
+	(log, event) => {
+		let contactID = event.contact_id.toNumber();
+
+		addContactLoadings[contactID].element.remove();
+		clearInterval(addContactLoadings[contactID].interval);
+
+		buildContactList(users[contactID]);
+	}
+);
+
+wssUserContactContract.on(
+	wssUserContactContract.filters.UserContactDestroyed(clientAddress),
+	(log, event) => {
+		let contactID = event.contact_id.toNumber();
+
+		removeContactLoadings[contactID].element.remove();
+		clearInterval(removeContactLoadings[contactID].interval);
+	}
+);
 
 /******************
 	Application
@@ -154,13 +177,23 @@ if (!isConnected()) {
 } else {
 	users = await userContract.getAll();
 	users = [...users];
+	userContacts = await userContactContract.getAll();
+	userContacts = [...userContacts];
 
 	buildPage(users);
 }
 
 async function buildPage(users) {
 	user = users.find((u) => u.owner == clientAddress);
-	userID = parseInt(Object.keys(users).find((key) => users[key].owner == clientAddress));
+	userID = getUserID(clientAddress);
+
+	// let userContactID = Object.keys(userContacts).find((key) => {
+	// 	return (
+	// 		userContact.user_id.toNumber() == userID && userContacts[key].contact_id.toNumber() == 2
+	// 	);
+	// });
+
+	// console.log(userContactID);
 
 	// nav
 	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
@@ -186,6 +219,15 @@ async function buildPage(users) {
 	}
 
 	// contact
+	userContacts.forEach((userContact) => {
+		if (!userContact.active) {
+			return;
+		}
+
+		let contactID = userContact.contact_id.toNumber();
+		buildContactList(users[contactID]);
+	});
+
 	contactSearchBtn.addEventListener('click', () => search());
 }
 
@@ -213,22 +255,102 @@ function search() {
 		return;
 	}
 
-	searchUsers.forEach((user) => buildcontactSearchList(user));
+	searchUsers.forEach((user) => buildContactSearchList(user));
 }
 
-function buildcontactSearchList(user) {
+function buildContactList(contact) {
+	let contactItem = document.createElement('div');
+
+	// name
+	let nameElement = document.createElement('p');
+	nameElement.classList.add('name');
+	nameElement.innerHTML = contact.fullname;
+
+	// address
+	let addressElement = document.createElement('p');
+	addressElement.classList.add('address');
+	addressElement.innerHTML = contact.owner;
+
+	// add
+	let btnContainer = document.createElement('div');
+	btnContainer.classList.add('removeBtnContainer');
+
+	let btnElement = document.createElement('button');
+	let btnIconElement = document.createElement('i');
+	btnIconElement.classList.add('fa-solid');
+	btnIconElement.classList.add('fa-circle-minus');
+
+	//loading
+	let removeLoadingContainer = document.createElement('div');
+	removeLoadingContainer.classList.add('hide');
+	removeLoadingContainer.setAttribute('id', 'loadingContainer');
+
+	let loadingElement = document.createElement('div');
+	loadingElement.classList.add('loading');
+
+	let innerLoadingElement = document.createElement('div');
+	let firstCircle = document.createElement('span');
+	let middleCircle = document.createElement('span');
+	let lastCircle = document.createElement('span');
+	firstCircle.classList.add('large');
+	lastCircle.classList.add('third');
+
+	// append
+	removeLoadingContainer.append(loadingElement);
+	loadingElement.append(innerLoadingElement);
+
+	innerLoadingElement.append(firstCircle);
+	innerLoadingElement.append(middleCircle);
+	innerLoadingElement.append(lastCircle);
+
+	btnElement.append(btnIconElement);
+	btnContainer.append(btnElement);
+
+	contactItem.append(nameElement);
+	contactItem.append(addressElement);
+	contactItem.append(btnContainer);
+	contactItem.append(removeLoadingContainer);
+	contactList.append(contactItem);
+
+	// event listener
+	btnElement.addEventListener('click', async () => {
+		let contactID = 3;
+		// let contactID = getUserID(contact.owner);
+
+		btnContainer.classList.add('hide');
+		removeLoadingContainer.classList.remove('hide');
+
+		removeContactLoadings[contactID] = {
+			interval: setInterval(() => bounceLoading(removeLoadingContainer), 300),
+			element: contactItem,
+		};
+
+		let userContactID = Object.keys(userContacts).find((key) => {
+			let userContact = userContacts[key];
+
+			return (
+				userContact.user_id == userID &&
+				userContact.contact_id == contactID &&
+				userContact.active == true
+			);
+		});
+
+		await userContactContract.destroy(userContactID);
+	});
+}
+
+function buildContactSearchList(contact) {
 	let searchItem = document.createElement('div');
 
 	// name
 	let nameElement = document.createElement('p');
 	nameElement.classList.add('name');
-	nameElement.innerHTML = user.fullname;
-	// nameElement.innerHTML = 'Alhajie Bakary Jammeh Jilanka';
+	nameElement.innerHTML = contact.fullname;
 
 	// address
 	let addressElement = document.createElement('p');
 	addressElement.classList.add('address');
-	addressElement.innerHTML = user.owner;
+	addressElement.innerHTML = contact.owner;
 
 	// add
 	let btnContainer = document.createElement('div');
@@ -273,13 +395,23 @@ function buildcontactSearchList(user) {
 
 	// event listener
 	btnElement.addEventListener('click', async () => {
+		// let contactID = getUserID(contact.owner);
+		let contactID = parseInt(Object.keys(users).find((key) => users[key].fullname == 'J hhh'));
+
 		btnContainer.classList.add('hide');
 		addLoadingContainer.classList.remove('hide');
 
-		addContactLoadingIntervals[userID] = setInterval(() => bounceLoading(addLoadingContainer), 300);
+		addContactLoadings[contactID] = {
+			interval: setInterval(() => bounceLoading(addLoadingContainer), 300),
+			element: searchItem,
+		};
 
-		await userContactContract.create(0, 1);
+		await userContactContract.create(userID, contactID);
 	});
+}
+
+function getUserID(address) {
+	return parseInt(Object.keys(users).find((key) => users[key].owner == address));
 }
 
 /******************
