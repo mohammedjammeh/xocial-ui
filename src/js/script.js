@@ -68,6 +68,7 @@ let removeContactLoadings = [];
 let contactSearchBtn = document.querySelectorAll('.search button')[0];
 let contactSearchField = document.querySelectorAll('.search input')[0];
 let contactSearchList = document.querySelectorAll('.contacts .search + .list')[0];
+let noUsersMessage = document.querySelector('.contacts #noUsersMessage');
 let addContactLoadings = [];
 
 let userSuggestionsContainer = document.querySelectorAll('.userSuggestions')[0];
@@ -92,12 +93,7 @@ wssLinkupContract.on('NewLinkup', (linkup) => {
 
 	linkupFormBtn.classList.remove('hide');
 
-	document.getElementById('type').value = 'chill';
-	document.getElementById('description').value = '';
-	document.getElementById('location').value = '';
-	document.getElementById('startDate').value = getTodayDate();
-	document.getElementById('startTime').value = '00:00';
-	document.getElementById('endTime').value = '23:59';
+	resetLinkUpForm();
 });
 
 wssUserContract.on('UserCreated', (u, id) => {
@@ -105,7 +101,6 @@ wssUserContract.on('UserCreated', (u, id) => {
 	clearInterval(profileNavAttentionInterval);
 
 	users[id.toString()] = u;
-
 	users = users.filter((value) => Object.keys(value).length !== 0);
 
 	buildPage(users);
@@ -184,317 +179,6 @@ if (!isConnected()) {
 	buildPage(users);
 }
 
-async function buildPage(users) {
-	user = users.find((u) => u.owner == clientAddress);
-	userID = getUserID(clientAddress);
-
-	// nav
-	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
-	profileBtn.addEventListener('click', () => goToView(userContainer, profileBtn));
-
-	// linkup
-	linkupForm.addEventListener('submit', (event) => createLinkup(event));
-	linkups.forEach((linkup) => prependLinkUp(linkup));
-
-	// profile
-	if (user) {
-		prefillUserForm(user);
-		disableUserFormExcept(profileFormEditBtn);
-		profileFormEditBtn.addEventListener('click', () => enableUserForm());
-		profileFormUpdateBtn.addEventListener('click', () => {
-			updateUser(userID);
-			disableUserFormExcept();
-		});
-		profileFormCancelBtn.addEventListener('click', () => disableUserFormExcept(profileFormEditBtn));
-	} else {
-		profileNavAttentionInterval = setInterval(() => swingAttentionCircle(profileBtn), 800);
-		profileFormSaveBtn.addEventListener('click', () => createUser());
-	}
-
-	// contact
-	userContacts.forEach((userContact) => {
-		if (!userContact.active) {
-			return;
-		}
-
-		let contactID = userContact.contact_id.toNumber();
-		buildContactList(users[contactID]);
-	});
-
-	contactSearchBtn.addEventListener('click', () => search());
-
-	// user suggestions
-	let activeContactIDs = getActiveContactIDs();
-	let contactSuggestions = users.filter((suggestion, id) => {
-		// return !activeContactIDs.includes(id) && suggestion.owner !== clientAddress;
-		return !activeContactIDs.includes(id);
-	});
-
-	contactSuggestions.forEach((suggestion) => buildUserSuggestion(suggestion));
-}
-
-function search() {
-	let searchValue = contactSearchField.value.toLowerCase();
-	contactSearchList.innerHTML = '';
-
-	if (searchValue === '') {
-		return;
-	}
-
-	let activeContactIDs = getActiveContactIDs();
-
-	let searchUsers = users.filter((searchUser) => {
-		return (
-			searchUser.fullname.toLowerCase().includes(searchValue) &&
-			!activeContactIDs.includes(getUserID(searchUser.owner))
-		);
-	});
-
-	if (searchUsers.length == 0) {
-		let messageContainer = document.createElement('div');
-		let messageElement = document.createElement('p');
-		messageElement.innerHTML = `There are no users with the name or address: ${searchValue}.`;
-
-		messageContainer.append(messageElement);
-		contactSearchList.append(messageContainer);
-
-		return;
-	}
-
-	searchUsers.forEach((user) => buildContactSearchList(user));
-}
-
-function getActiveContactIDs() {
-	return userContacts
-		.map((userContact) => {
-			if (!userContact.active) {
-				return;
-			}
-
-			return userContact.contact_id.toNumber();
-		})
-		.filter((userContact) => userContact != undefined);
-}
-
-function buildContactList(contact) {
-	let contactItem = document.createElement('div');
-
-	// name
-	let nameElement = document.createElement('p');
-	nameElement.classList.add('name');
-	nameElement.innerHTML = contact.fullname;
-
-	// address
-	let addressElement = document.createElement('p');
-	addressElement.classList.add('address');
-	addressElement.innerHTML = contact.owner;
-
-	// add
-	let btnContainer = document.createElement('div');
-	btnContainer.classList.add('removeBtnContainer');
-
-	let btnElement = document.createElement('button');
-	let btnIconElement = document.createElement('i');
-	btnIconElement.classList.add('fa-solid');
-	btnIconElement.classList.add('fa-circle-minus');
-
-	//loading
-	let removeLoadingContainer = document.createElement('div');
-	removeLoadingContainer.classList.add('hide');
-	removeLoadingContainer.setAttribute('id', 'loadingContainer');
-
-	let loadingElement = document.createElement('div');
-	loadingElement.classList.add('loading');
-
-	let innerLoadingElement = document.createElement('div');
-	let firstCircle = document.createElement('span');
-	let middleCircle = document.createElement('span');
-	let lastCircle = document.createElement('span');
-	firstCircle.classList.add('large');
-	lastCircle.classList.add('third');
-
-	// append
-	removeLoadingContainer.append(loadingElement);
-	loadingElement.append(innerLoadingElement);
-
-	innerLoadingElement.append(firstCircle);
-	innerLoadingElement.append(middleCircle);
-	innerLoadingElement.append(lastCircle);
-
-	btnElement.append(btnIconElement);
-	btnContainer.append(btnElement);
-
-	contactItem.append(nameElement);
-	contactItem.append(addressElement);
-	contactItem.append(btnContainer);
-	contactItem.append(removeLoadingContainer);
-	contactList.append(contactItem);
-
-	// event listener
-	btnElement.addEventListener('click', async () => {
-		let contactID = 9;
-		// let contactID = getUserID(contact.owner);
-
-		btnContainer.classList.add('hide');
-		removeLoadingContainer.classList.remove('hide');
-
-		removeContactLoadings[contactID] = {
-			interval: setInterval(() => bounceLoading(removeLoadingContainer), 300),
-			element: contactItem,
-		};
-
-		let userContactID = Object.keys(userContacts).find((key) => {
-			let userContact = userContacts[key];
-
-			// console.log(userContact.user_id.toNumber(), userContact.contact_id.toNumber(), userContact.active);
-
-			return (
-				userContact.user_id == userID &&
-				userContact.contact_id == contactID &&
-				userContact.active == true
-			);
-		});
-
-		await userContactContract.destroy(userContactID);
-	});
-}
-
-function buildContactSearchList(contact) {
-	let searchItem = document.createElement('div');
-
-	// name
-	let nameElement = document.createElement('p');
-	nameElement.classList.add('name');
-	nameElement.innerHTML = contact.fullname;
-
-	// address
-	let addressElement = document.createElement('p');
-	addressElement.classList.add('address');
-	addressElement.innerHTML = contact.owner;
-
-	// add
-	let btnContainer = document.createElement('div');
-	btnContainer.classList.add('removeBtnContainer');
-
-	let btnElement = document.createElement('button');
-	let btnIconElement = document.createElement('i');
-	btnIconElement.classList.add('fa-solid');
-	btnIconElement.classList.add('fa-circle-plus');
-
-	//loading
-	let addLoadingContainer = document.createElement('div');
-	addLoadingContainer.classList.add('hide');
-	addLoadingContainer.setAttribute('id', 'loadingContainer');
-
-	let loadingElement = document.createElement('div');
-	loadingElement.classList.add('loading');
-
-	let innerLoadingElement = document.createElement('div');
-	let firstCircle = document.createElement('span');
-	let middleCircle = document.createElement('span');
-	let lastCircle = document.createElement('span');
-	firstCircle.classList.add('large');
-	lastCircle.classList.add('third');
-
-	// append
-	addLoadingContainer.append(loadingElement);
-	loadingElement.append(innerLoadingElement);
-
-	innerLoadingElement.append(firstCircle);
-	innerLoadingElement.append(middleCircle);
-	innerLoadingElement.append(lastCircle);
-
-	btnElement.append(btnIconElement);
-	btnContainer.append(btnElement);
-
-	searchItem.append(nameElement);
-	searchItem.append(addressElement);
-	searchItem.append(btnContainer);
-	searchItem.append(addLoadingContainer);
-	contactSearchList.append(searchItem);
-
-	// event listener
-	btnElement.addEventListener('click', async () => {
-		// let contactID = getUserID(contact.owner);
-		let contactID = parseInt(Object.keys(users).find((key) => users[key].fullname == 'J hhh'));
-
-		btnContainer.classList.add('hide');
-		addLoadingContainer.classList.remove('hide');
-
-		addContactLoadings[contactID] = {
-			interval: setInterval(() => bounceLoading(addLoadingContainer), 300),
-			element: searchItem,
-		};
-
-		await userContactContract.create(userID, contactID);
-	});
-}
-
-function buildUserSuggestion(suggestion) {
-	let suggestionElement = document.createElement('div');
-
-	let infoElement = document.createElement('div');
-	infoElement.classList.add('info');
-
-	let nameElement = document.createElement('p');
-	nameElement.innerHTML = suggestion.fullname;
-
-	let addressElement = document.createElement('p');
-	addressElement.innerHTML = suggestion.owner;
-
-	let saveBtn = document.createElement('button');
-	saveBtn.innerHTML = 'Save';
-
-	let suggestionLoadingContainer = document.createElement('div');
-	suggestionLoadingContainer.classList.add('hide');
-	suggestionLoadingContainer.setAttribute('id', 'loadingContainer');
-
-	let loadingElement = document.createElement('div');
-	loadingElement.classList.add('loading');
-
-	let innerLoadingElement = document.createElement('div');
-	let firstCircle = document.createElement('span');
-	let middleCircle = document.createElement('span');
-	let lastCircle = document.createElement('span');
-	firstCircle.classList.add('large');
-	lastCircle.classList.add('third');
-
-	userSuggestionsContainer.append(suggestionElement);
-	suggestionElement.append(infoElement);
-	suggestionElement.append(saveBtn);
-	suggestionElement.append(suggestionLoadingContainer);
-
-	infoElement.append(nameElement);
-	infoElement.append(addressElement);
-
-	suggestionLoadingContainer.append(loadingElement);
-	loadingElement.append(innerLoadingElement);
-	innerLoadingElement.append(firstCircle);
-	innerLoadingElement.append(middleCircle);
-	innerLoadingElement.append(lastCircle);
-
-	// event listener
-	saveBtn.addEventListener('click', async () => {
-		let contactID = 5;
-		// let contactID = getUserID(contact.owner);
-		// let contactID = parseInt(Object.keys(users).find((key) => users[key].fullname == 'J hhh'));
-
-		saveBtn.classList.add('hide');
-		suggestionLoadingContainer.classList.remove('hide');
-
-		addContactLoadings[contactID] = {
-			interval: setInterval(() => bounceLoading(suggestionLoadingContainer), 300),
-			element: suggestionElement,
-		};
-
-		await userContactContract.create(userID, contactID);
-	});
-}
-
-function getUserID(address) {
-	return parseInt(Object.keys(users).find((key) => users[key].owner == address));
-}
-
 /******************
 	Functions
 ******************/
@@ -539,80 +223,65 @@ async function createLinkup(event) {
 	);
 }
 
+function resetLinkUpForm() {
+	document.getElementById('type').value = 'chill';
+	document.getElementById('description').value = '';
+	document.getElementById('location').value = '';
+	document.getElementById('startDate').value = getTodayDate();
+	document.getElementById('startTime').value = '00:00';
+	document.getElementById('endTime').value = '23:59';
+}
+
 function prependLinkUp(linkup) {
-	let linkupElement = document.createElement('div');
-	linkupElement.classList.add('linkup');
-	linkupElement.classList.add('columnContainer');
+	let linkupElement = newElement('div', ['linkup', 'columnContainer']);
 	linkupContainer.prepend(linkupElement);
 
 	// status
-	let statusElement = document.createElement('p');
-	statusElement.classList.add('type');
-	statusElement.innerHTML = '🎉 🎉 ' + linkup.status;
+	let statusElement = newElement('p', ['type'], '🎉 🎉 ' + linkup.status);
 	linkupElement.appendChild(statusElement);
 
 	// location
-	let locationElement = document.createElement('p');
-	locationElement.classList.add('location');
-	locationElement.innerHTML = ' ' + linkup.location;
+	let locationElement = newElement('p', ['location'], ' ' + linkup.location);
+	let locationIconElement = newElement('i', ['fa-solid', 'fa-location-dot']);
 	linkupElement.appendChild(locationElement);
-
-	let locationIconElement = document.createElement('i');
-	locationIconElement.classList.add('fa-solid');
-	locationIconElement.classList.add('fa-location-dot');
 	locationElement.prepend(locationIconElement);
 
 	// moment
-	let momentElement = document.createElement('p');
-	momentElement.classList.add('moment');
-	momentElement.innerHTML = ' ' + formatMoment(linkup);
+	let momentElement = newElement('p', ['location'], ' ' + formatMoment(linkup));
+	let momentIconElement = newElement('i', ['fa-regular', 'fa-calendar']);
 	linkupElement.appendChild(momentElement);
-
-	let momentIconElement = document.createElement('i');
-	momentIconElement.classList.add('fa-regular');
-	momentIconElement.classList.add('fa-calendar');
 	momentElement.prepend(momentIconElement);
 
 	// description
-	let descriptionElement = document.createElement('p');
-	descriptionElement.classList.add('description');
-	descriptionElement.innerHTML = ' ' + linkup.description;
+	let descriptionElement = newElement('p', 'description', ' ' + linkup.description);
 	linkupElement.appendChild(descriptionElement);
 
 	// members
-	let membersContainer = document.createElement('ul');
-	membersContainer.classList.add('members');
+	let membersContainer = newElement('ul', 'members');
 	linkupElement.appendChild(membersContainer);
 
 	linkup.attendees.forEach((member) => {
-		let memberElement = document.createElement('li');
-		memberElement.innerHTML = 'Alhaji Mballow'; // member
+		let memberElement = newElement('li', '', 'Alhaji Mballow');
 		membersContainer.append(memberElement);
 
-		let memberIconElement = document.createElement('i');
-		memberIconElement.classList.add('fa-regular');
-		memberIconElement.classList.add('fa-circle-check');
+		let memberIconElement = newElement('i', ['fa-regular', 'fa-circle-check']);
 		memberElement.append(memberIconElement);
 	});
 
 	// buttons (broadcast)
-	let buttonsContainer = document.createElement('div');
-	buttonsContainer.classList.add('buttons');
+	let buttonsContainer = newElement('div', 'buttons');
+	let broadcastFormContainer = newElement('div', ['broadcastForm']);
 
-	let broadcastFormContainer = document.createElement('div');
-	broadcastFormContainer.classList.add('broadcastForm');
-
-	let broadcastFormElement = document.createElement('form');
-	let toElement = document.createElement('select');
+	let broadcastFormElement = newElement('form');
+	let toElement = newElement('select');
 
 	linkup.attendees.forEach((member) => {
-		let toOptionElement = document.createElement('option');
-		toOptionElement.innerHTML = 'Elliot Mass';
+		let toOptionElement = newElement('option', '', 'Elliot Mass');
 		toOptionElement.value = 'yooo';
 		toElement.append(toOptionElement);
 	});
 
-	let submitElement = document.createElement('input');
+	let submitElement = newElement('input');
 	submitElement.value = 'Broadcast';
 	submitElement.type = 'submit';
 
@@ -623,11 +292,8 @@ function prependLinkUp(linkup) {
 	linkupElement.appendChild(buttonsContainer);
 
 	// buttons (join)
-	let joinBtnContainer = document.createElement('div');
-	joinBtnContainer.classList.add('joinBtn');
-
-	let joinBtnElement = document.createElement('button');
-	joinBtnElement.innerHTML = 'Join';
+	let joinBtnContainer = newElement('div', ['joinBtn']);
+	let joinBtnElement = newElement('button', [], 'Join');
 
 	joinBtnContainer.append(joinBtnElement);
 	linkupElement.appendChild(joinBtnContainer);
@@ -744,6 +410,149 @@ function getSelected(fieldName) {
 	return selected;
 }
 
+function search() {
+	let searchValue = contactSearchField.value.toLowerCase();
+	noUsersMessage.classList.add('hide');
+	contactSearchList.innerHTML = '';
+
+	if (searchValue === '') {
+		return;
+	}
+
+	let activeContactIDs = getActiveContactIDs();
+	let searchUsers = users.filter((searchUser) => {
+		return (
+			searchUser.fullname.toLowerCase().includes(searchValue) &&
+			!activeContactIDs.includes(getUserID(searchUser.owner))
+		);
+	});
+
+	if (searchUsers.length == 0) {
+		noUsersMessage.classList.remove('hide');
+
+		return;
+	}
+
+	searchUsers.forEach((user) => buildSearchList(user));
+}
+
+function buildContactList(contact) {
+	let contactElements = newContactElements(contact);
+	let btn = contactElements['btn'];
+	let loadingContainer = contactElements['loading'];
+	let element = contactElements['element'];
+
+	contactList.append(element);
+
+	btn.addEventListener('click', async () => {
+		let contactID = 5;
+		// let contactID = getUserID(contact.owner);
+
+		replaceButtonWithLoading(btn, loadingContainer);
+		removeContactLoadings[contactID] = {
+			interval: setInterval(() => bounceLoading(loadingContainer), 300),
+			element: element,
+		};
+
+		await userContactContract.destroy(getUserContactID(contactID));
+	});
+}
+
+function buildSearchList(contact) {
+	let contactElements = newContactElements(contact, 'search');
+	let btn = contactElements['btn'];
+	let loadingContainer = contactElements['loading'];
+	let element = contactElements['element'];
+
+	contactSearchList.append(element);
+
+	btn.addEventListener('click', async () => {
+		let contactID = 4;
+		// let contactID = getUserID(contact.owner);
+		// let contactID = parseInt(Object.keys(users).find((key) => users[key].fullname == 'J hhh'));]
+
+		replaceButtonWithLoading(btn, loadingContainer);
+		addContactLoadings[contactID] = {
+			interval: setInterval(() => bounceLoading(loadingContainer), 300),
+			element: element,
+		};
+
+		await userContactContract.create(userID, contactID);
+	});
+}
+
+function newContactElements(contact, type) {
+	let contactItem = newElement('div');
+
+	let nameElement = newElement('p', 'name', contact.fullname);
+	let addressElement = newElement('p', 'address', contact.owner);
+
+	let btnContainer = newElement('div', 'removeBtnContainer');
+	let btnElement = newElement('button');
+	let btnIconClass = type == 'search' ? 'plus' : 'minus';
+	let btnIconElement = newElement('i', ['fa-solid', 'fa-circle-' + btnIconClass]);
+
+	let loadingContainer = createLoadingContainter();
+	loadingContainer.setAttribute('id', 'loadingContainer');
+
+	btnElement.append(btnIconElement);
+	btnContainer.append(btnElement);
+
+	contactItem.append(nameElement);
+	contactItem.append(addressElement);
+	contactItem.append(btnContainer);
+	contactItem.append(loadingContainer);
+
+	return {
+		btn: btnContainer,
+		loading: loadingContainer,
+		element: contactItem,
+	};
+}
+
+function createLoadingContainter() {
+	let nloadingContainer = newElement('div', 'hide');
+	nloadingContainer.setAttribute('id', 'loadingContainer');
+
+	let nLoadingElement = newElement('div', 'loading');
+
+	let nInnerLoadingElement = newElement('div');
+	let nFirstCircle = newElement('span', 'large');
+	let nMiddleCircle = newElement('span');
+	let nLastCircle = newElement('span', 'third');
+
+	nloadingContainer.append(nLoadingElement);
+	nLoadingElement.append(nInnerLoadingElement);
+	nInnerLoadingElement.append(nFirstCircle);
+	nInnerLoadingElement.append(nMiddleCircle);
+	nInnerLoadingElement.append(nLastCircle);
+
+	return nloadingContainer;
+}
+// user suggestion
+function buildUserSuggestion(suggestion) {
+	let suggestionItem = newElement('div');
+
+	let infoElement = newElement('div', 'info');
+	let nameElement = newElement('p', '', suggestion.fullname);
+	let addressElement = newElement('p', '', suggestion.owner);
+	let saveBtn = newElement('button', '', 'Save');
+
+	let suggestionLoadingContainer = createLoadingContainter();
+
+	userSuggestionsContainer.append(suggestionItem);
+	suggestionItem.append(infoElement);
+	suggestionItem.append(saveBtn);
+	suggestionItem.append(suggestionLoadingContainer);
+
+	infoElement.append(nameElement);
+	infoElement.append(addressElement);
+
+	saveBtn.addEventListener('click', async () =>
+		addContact(suggestion, saveBtn, suggestionLoadingContainer, suggestionItem)
+	);
+}
+
 // general
 function isConnected() {
 	return accounts.length > 0;
@@ -752,6 +561,32 @@ function isConnected() {
 async function connect() {
 	await window.ethereum.request({ method: 'eth_requestAccounts' });
 	connectBtn.classList.add('hide');
+}
+
+function getUserID(address) {
+	return parseInt(Object.keys(users).find((key) => users[key].owner == address));
+}
+
+function getUserContactID(contactID) {
+	return Object.keys(userContacts).find((key) => {
+		let userContact = userContacts[key];
+
+		return (
+			userContact.user_id == userID && userContact.contact_id == contactID && userContact.active == true
+		);
+	});
+}
+
+function getActiveContactIDs() {
+	return userContacts
+		.map((userContact) => {
+			if (!userContact.active) {
+				return;
+			}
+
+			return userContact.contact_id.toNumber();
+		})
+		.filter((userContact) => userContact != undefined);
 }
 
 function getTodayDate() {
@@ -763,6 +598,24 @@ function getTodayDate() {
 	if (mm < 10) mm = '0' + mm;
 
 	return today.getFullYear() + '-' + mm + '-' + dd;
+}
+
+function newElement(tagname, classes, content) {
+	let element = document.createElement(tagname);
+
+	if (typeof classes == 'string' && classes !== '') {
+		element.classList.add(classes);
+	} else if (typeof classes == 'object') {
+		classes.forEach((elementClass) => {
+			element.classList.add(elementClass);
+		});
+	}
+
+	if (content) {
+		element.innerHTML = content;
+	}
+
+	return element;
 }
 
 function goToView(activeContainer, activeBtn) {
@@ -794,4 +647,50 @@ function bounceLoading(loadingContainer) {
 	let nextLoadingElement = loadingContainer.querySelectorAll('.loading span.large + span')[0];
 	nextLoadingElement.classList.add('large');
 	largeLoadingElement.classList.remove('large');
+}
+
+async function buildPage(users) {
+	user = users.find((u) => u.owner == clientAddress);
+	userID = getUserID(clientAddress);
+
+	// nav
+	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
+	profileBtn.addEventListener('click', () => goToView(userContainer, profileBtn));
+
+	// linkup
+	linkupForm.addEventListener('submit', (event) => createLinkup(event));
+	linkups.forEach((linkup) => prependLinkUp(linkup));
+
+	// profile
+	if (user) {
+		prefillUserForm(user);
+		disableUserFormExcept(profileFormEditBtn);
+		profileFormEditBtn.addEventListener('click', () => enableUserForm());
+		profileFormUpdateBtn.addEventListener('click', () => {
+			updateUser(userID);
+			disableUserFormExcept();
+		});
+		profileFormCancelBtn.addEventListener('click', () => disableUserFormExcept(profileFormEditBtn));
+	} else {
+		profileNavAttentionInterval = setInterval(() => swingAttentionCircle(profileBtn), 800);
+		profileFormSaveBtn.addEventListener('click', () => createUser());
+	}
+
+	// contact (add check - contact belongs to user)
+	userContacts.forEach((userContact) => {
+		if (userContact.active) {
+			let contactID = userContact.contact_id.toNumber();
+			buildContactList(users[contactID]);
+		}
+	});
+	contactSearchBtn.addEventListener('click', () => search());
+
+	// user suggestions
+	let activeContactIDs = getActiveContactIDs();
+	let contactSuggestions = users.filter((suggestion, id) => {
+		// return !activeContactIDs.includes(id) && suggestion.owner !== clientAddress;
+		return !activeContactIDs.includes(id);
+	});
+
+	contactSuggestions.forEach((suggestion) => buildUserSuggestion(suggestion));
 }
