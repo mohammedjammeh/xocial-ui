@@ -52,6 +52,7 @@ let linkupForm = document.getElementById('linkupForm');
 let linkupFormBtn = linkupForm.querySelector('input[type="submit"]');
 let linkupFormLoadingContainer = linkupForm.querySelector('#loadingContainer');
 let linkupFormLoadingInterval;
+let linkupJoinInterval = [];
 
 let userContainer = document.querySelectorAll('.user')[0];
 let profileForm = document.getElementById('profileForm');
@@ -206,6 +207,19 @@ function getUserContactID(contactID) {
 	});
 }
 
+function getLinkupID(linkupToFind) {
+	return Object.keys(linkups).find((key) => {
+		return (
+			linkups[key].owner == linkupToFind.owner &&
+			linkups[key].status == linkupToFind.status &&
+			linkups[key].description == linkupToFind.description &&
+			linkups[key].location == linkupToFind.location &&
+			linkups[key].startTime == linkupToFind.startTime &&
+			linkups[key].endTime == linkupToFind.endTime
+		);
+	});
+}
+
 function getActiveContactIDs() {
 	return userContacts
 		.map((userContact) => {
@@ -321,7 +335,6 @@ async function buildPage(users) {
 		// return !activeContactIDs.includes(id) && suggestion.owner !== clientAddress;
 		return !activeContactIDs.includes(id);
 	});
-
 	contactSuggestions.forEach((suggestion) => buildUserSuggestion(suggestion));
 }
 
@@ -438,8 +451,24 @@ function prependLinkUp(linkup) {
 	let joinBtnContainer = newElement('div', ['joinBtn']);
 	let joinBtnElement = newElement('button', [], 'Join');
 
+	let joinLoadingContainer = createLoadingContainter();
+	joinLoadingContainer.setAttribute('id', 'loadingContainer');
+
 	joinBtnContainer.append(joinBtnElement);
 	linkupElement.appendChild(joinBtnContainer);
+	linkupElement.appendChild(joinLoadingContainer);
+
+	joinBtnElement.addEventListener('click', () => {
+		let linkupID = getLinkupID(linkup);
+
+		replaceButtonWithLoading(joinBtnContainer, joinLoadingContainer);
+
+		linkupJoinInterval[linkupID] = {
+			interval: setInterval(() => bounceLoading(joinLoadingContainer), 300),
+			element: linkupElement,
+		};
+		// await userContactContract.create(userID, linkupID);
+	});
 }
 
 function formatMoment(linkup) {
