@@ -182,6 +182,149 @@ if (!isConnected()) {
 /******************
 	Functions
 ******************/
+// general
+function isConnected() {
+	return accounts.length > 0;
+}
+
+async function connect() {
+	await window.ethereum.request({ method: 'eth_requestAccounts' });
+	connectBtn.classList.add('hide');
+}
+
+function getUserID(address) {
+	return parseInt(Object.keys(users).find((key) => users[key].owner == address));
+}
+
+function getUserContactID(contactID) {
+	return Object.keys(userContacts).find((key) => {
+		let userContact = userContacts[key];
+
+		return (
+			userContact.user_id == userID && userContact.contact_id == contactID && userContact.active == true
+		);
+	});
+}
+
+function getActiveContactIDs() {
+	return userContacts
+		.map((userContact) => {
+			if (!userContact.active) {
+				return;
+			}
+
+			return userContact.contact_id.toNumber();
+		})
+		.filter((userContact) => userContact != undefined);
+}
+
+function getTodayDate() {
+	const today = new Date();
+	let mm = today.getMonth() + 1;
+	let dd = today.getDate();
+
+	if (dd < 10) dd = '0' + dd;
+	if (mm < 10) mm = '0' + mm;
+
+	return today.getFullYear() + '-' + mm + '-' + dd;
+}
+
+function newElement(tagname, classes, content) {
+	let element = document.createElement(tagname);
+
+	if (typeof classes == 'string' && classes !== '') {
+		element.classList.add(classes);
+	} else if (typeof classes == 'object') {
+		classes.forEach((elementClass) => {
+			element.classList.add(elementClass);
+		});
+	}
+
+	if (content) {
+		element.innerHTML = content;
+	}
+
+	return element;
+}
+
+function goToView(activeContainer, activeBtn) {
+	let parentContainers = document.getElementsByClassName('middleColumn')[0].children;
+	for (let key in parentContainers) {
+		if (parentContainers.hasOwnProperty(key)) {
+			parentContainers[key].classList.add('hide');
+		}
+	}
+
+	activeContainer.classList.remove('hide');
+
+	navBtns.forEach((btn) => btn.classList.remove('active'));
+	activeBtn.classList.add('active');
+}
+
+function bounceLoading(loadingContainer) {
+	let largeLoadingElement = loadingContainer.querySelectorAll('.loading span.large')[0];
+
+	if (largeLoadingElement.classList.contains('third')) {
+		largeLoadingElement.classList.remove('large');
+
+		let firstLoadingSpan = loadingContainer.querySelectorAll('.loading span:first-of-type')[0];
+		firstLoadingSpan.classList.add('large');
+
+		return;
+	}
+
+	let nextLoadingElement = loadingContainer.querySelectorAll('.loading span.large + span')[0];
+	nextLoadingElement.classList.add('large');
+	largeLoadingElement.classList.remove('large');
+}
+
+async function buildPage(users) {
+	user = users.find((u) => u.owner == clientAddress);
+	userID = getUserID(clientAddress);
+
+	// nav
+	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
+	profileBtn.addEventListener('click', () => goToView(userContainer, profileBtn));
+
+	// linkup
+	linkupForm.addEventListener('submit', (event) => createLinkup(event));
+	linkups.forEach((linkup) => prependLinkUp(linkup));
+
+	// profile
+	if (!user) {
+		profileNavAttentionInterval = setInterval(() => swingAttentionCircle(profileBtn), 800);
+		profileFormSaveBtn.addEventListener('click', () => createUser());
+		return;
+	}
+
+	prefillUserForm(user);
+	disableUserFormExcept(profileFormEditBtn);
+	profileFormEditBtn.addEventListener('click', () => enableUserForm());
+	profileFormUpdateBtn.addEventListener('click', () => {
+		updateUser(userID);
+		disableUserFormExcept();
+	});
+	profileFormCancelBtn.addEventListener('click', () => disableUserFormExcept(profileFormEditBtn));
+
+	// contact (add check - contact belongs to user)
+	userContacts.forEach((userContact) => {
+		if (userContact.active) {
+			let contactID = userContact.contact_id.toNumber();
+			buildContactList(users[contactID]);
+		}
+	});
+	contactSearchBtn.addEventListener('click', () => search());
+
+	// user suggestions
+	let activeContactIDs = getActiveContactIDs();
+	let contactSuggestions = users.filter((suggestion, id) => {
+		// return !activeContactIDs.includes(id) && suggestion.owner !== clientAddress;
+		return !activeContactIDs.includes(id);
+	});
+
+	contactSuggestions.forEach((suggestion) => buildUserSuggestion(suggestion));
+}
+
 // nav attention
 function swingAttentionCircle(btn) {
 	btn.children[1].classList.add('dot');
@@ -551,146 +694,4 @@ function buildUserSuggestion(suggestion) {
 	saveBtn.addEventListener('click', async () =>
 		addContact(suggestion, saveBtn, suggestionLoadingContainer, suggestionItem)
 	);
-}
-
-// general
-function isConnected() {
-	return accounts.length > 0;
-}
-
-async function connect() {
-	await window.ethereum.request({ method: 'eth_requestAccounts' });
-	connectBtn.classList.add('hide');
-}
-
-function getUserID(address) {
-	return parseInt(Object.keys(users).find((key) => users[key].owner == address));
-}
-
-function getUserContactID(contactID) {
-	return Object.keys(userContacts).find((key) => {
-		let userContact = userContacts[key];
-
-		return (
-			userContact.user_id == userID && userContact.contact_id == contactID && userContact.active == true
-		);
-	});
-}
-
-function getActiveContactIDs() {
-	return userContacts
-		.map((userContact) => {
-			if (!userContact.active) {
-				return;
-			}
-
-			return userContact.contact_id.toNumber();
-		})
-		.filter((userContact) => userContact != undefined);
-}
-
-function getTodayDate() {
-	const today = new Date();
-	let mm = today.getMonth() + 1;
-	let dd = today.getDate();
-
-	if (dd < 10) dd = '0' + dd;
-	if (mm < 10) mm = '0' + mm;
-
-	return today.getFullYear() + '-' + mm + '-' + dd;
-}
-
-function newElement(tagname, classes, content) {
-	let element = document.createElement(tagname);
-
-	if (typeof classes == 'string' && classes !== '') {
-		element.classList.add(classes);
-	} else if (typeof classes == 'object') {
-		classes.forEach((elementClass) => {
-			element.classList.add(elementClass);
-		});
-	}
-
-	if (content) {
-		element.innerHTML = content;
-	}
-
-	return element;
-}
-
-function goToView(activeContainer, activeBtn) {
-	let parentContainers = document.getElementsByClassName('middleColumn')[0].children;
-	for (let key in parentContainers) {
-		if (parentContainers.hasOwnProperty(key)) {
-			parentContainers[key].classList.add('hide');
-		}
-	}
-
-	activeContainer.classList.remove('hide');
-
-	navBtns.forEach((btn) => btn.classList.remove('active'));
-	activeBtn.classList.add('active');
-}
-
-function bounceLoading(loadingContainer) {
-	let largeLoadingElement = loadingContainer.querySelectorAll('.loading span.large')[0];
-
-	if (largeLoadingElement.classList.contains('third')) {
-		largeLoadingElement.classList.remove('large');
-
-		let firstLoadingSpan = loadingContainer.querySelectorAll('.loading span:first-of-type')[0];
-		firstLoadingSpan.classList.add('large');
-
-		return;
-	}
-
-	let nextLoadingElement = loadingContainer.querySelectorAll('.loading span.large + span')[0];
-	nextLoadingElement.classList.add('large');
-	largeLoadingElement.classList.remove('large');
-}
-
-async function buildPage(users) {
-	user = users.find((u) => u.owner == clientAddress);
-	userID = getUserID(clientAddress);
-
-	// nav
-	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
-	profileBtn.addEventListener('click', () => goToView(userContainer, profileBtn));
-
-	// linkup
-	linkupForm.addEventListener('submit', (event) => createLinkup(event));
-	linkups.forEach((linkup) => prependLinkUp(linkup));
-
-	// profile
-	if (user) {
-		prefillUserForm(user);
-		disableUserFormExcept(profileFormEditBtn);
-		profileFormEditBtn.addEventListener('click', () => enableUserForm());
-		profileFormUpdateBtn.addEventListener('click', () => {
-			updateUser(userID);
-			disableUserFormExcept();
-		});
-		profileFormCancelBtn.addEventListener('click', () => disableUserFormExcept(profileFormEditBtn));
-	} else {
-		profileNavAttentionInterval = setInterval(() => swingAttentionCircle(profileBtn), 800);
-		profileFormSaveBtn.addEventListener('click', () => createUser());
-	}
-
-	// contact (add check - contact belongs to user)
-	userContacts.forEach((userContact) => {
-		if (userContact.active) {
-			let contactID = userContact.contact_id.toNumber();
-			buildContactList(users[contactID]);
-		}
-	});
-	contactSearchBtn.addEventListener('click', () => search());
-
-	// user suggestions
-	let activeContactIDs = getActiveContactIDs();
-	let contactSuggestions = users.filter((suggestion, id) => {
-		// return !activeContactIDs.includes(id) && suggestion.owner !== clientAddress;
-		return !activeContactIDs.includes(id);
-	});
-
-	contactSuggestions.forEach((suggestion) => buildUserSuggestion(suggestion));
 }
