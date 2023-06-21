@@ -287,12 +287,14 @@ nav ul li a.attention span.dot {
 .userSuggestions > div {
 	overflow: hidden;
 	padding: 5% 0;
+	/* background: red; */
 }
 
 .userSuggestions .info {
 	float: left;
 	width: 65%;
 	margin: 0;
+	/* background: yellow; */
 }
 
 .userSuggestions .info p {
@@ -318,6 +320,13 @@ nav ul li a.attention span.dot {
 	margin: 2.5% 0 0 0;
 	font-size: 15px;
 	padding: 4px 0 7px;
+}
+
+.userSuggestions #loadingContainer {
+	margin-top: 10px;
+	padding: 10px 0 10px;
+	width: 18%;
+	float: right;
 }
 
 /*******************
@@ -510,7 +519,6 @@ nav ul li a.attention span.dot {
 
 .contacts .list #loadingContainer {
 	width: 12%;
-	/* margin: 1% 0 0; */
 	float: right;
 	padding: 6.5px 0 0.5px;
 }

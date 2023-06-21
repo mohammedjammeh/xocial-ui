@@ -230,65 +230,7 @@ async function buildPage(users) {
 		return !activeContactIDs.includes(id);
 	});
 
-	contactSuggestions.forEach((suggestion) => {
-		let suggestionElement = document.createElement('div');
-
-		let infoElement = document.createElement('div');
-		infoElement.classList.add('info');
-
-		let nameElement = document.createElement('p');
-		nameElement.innerHTML = suggestion.fullname;
-
-		let addressElement = document.createElement('p');
-		addressElement.innerHTML = suggestion.owner;
-
-		let saveBtn = document.createElement('button');
-		saveBtn.innerHTML = 'Save';
-
-		let suggestionLoadingContainer = document.createElement('div');
-		// suggestionLoadingContainer.classList.add('hide');
-		suggestionLoadingContainer.setAttribute('id', 'loadingContainer');
-
-		let loadingElement = document.createElement('div');
-		loadingElement.classList.add('loading');
-
-		let innerLoadingElement = document.createElement('div');
-		let firstCircle = document.createElement('span');
-		let middleCircle = document.createElement('span');
-		let lastCircle = document.createElement('span');
-		firstCircle.classList.add('large');
-		lastCircle.classList.add('third');
-
-		userSuggestionsContainer.append(suggestionElement);
-		suggestionElement.append(infoElement);
-		suggestionElement.append(saveBtn);
-		suggestionElement.append(suggestionLoadingContainer);
-
-		infoElement.append(nameElement);
-		infoElement.append(addressElement);
-
-		suggestionLoadingContainer.append(loadingElement);
-		loadingElement.append(innerLoadingElement);
-		innerLoadingElement.append(firstCircle);
-		innerLoadingElement.append(middleCircle);
-		innerLoadingElement.append(lastCircle);
-
-		// event listener
-		saveBtn.addEventListener('click', async () => {
-			// let contactID = getUserID(contact.owner);
-			let contactID = parseInt(Object.keys(users).find((key) => users[key].fullname == 'J hhh'));
-
-			saveBtn.classList.add('hide');
-			// addLoadingContainer.classList.remove('hide');
-
-			// addContactLoadings[contactID] = {
-			// 	interval: setInterval(() => bounceLoading(addLoadingContainer), 300),
-			// 	element: searchItem,
-			// };
-
-			// await userContactContract.create(userID, contactID);
-		});
-	});
+	contactSuggestions.forEach((suggestion) => buildUserSuggestion(suggestion));
 }
 
 function search() {
@@ -390,7 +332,7 @@ function buildContactList(contact) {
 
 	// event listener
 	btnElement.addEventListener('click', async () => {
-		let contactID = 3;
+		let contactID = 9;
 		// let contactID = getUserID(contact.owner);
 
 		btnContainer.classList.add('hide');
@@ -403,6 +345,8 @@ function buildContactList(contact) {
 
 		let userContactID = Object.keys(userContacts).find((key) => {
 			let userContact = userContacts[key];
+
+			// console.log(userContact.user_id.toNumber(), userContact.contact_id.toNumber(), userContact.active);
 
 			return (
 				userContact.user_id == userID &&
@@ -480,6 +424,67 @@ function buildContactSearchList(contact) {
 		addContactLoadings[contactID] = {
 			interval: setInterval(() => bounceLoading(addLoadingContainer), 300),
 			element: searchItem,
+		};
+
+		await userContactContract.create(userID, contactID);
+	});
+}
+
+function buildUserSuggestion(suggestion) {
+	let suggestionElement = document.createElement('div');
+
+	let infoElement = document.createElement('div');
+	infoElement.classList.add('info');
+
+	let nameElement = document.createElement('p');
+	nameElement.innerHTML = suggestion.fullname;
+
+	let addressElement = document.createElement('p');
+	addressElement.innerHTML = suggestion.owner;
+
+	let saveBtn = document.createElement('button');
+	saveBtn.innerHTML = 'Save';
+
+	let suggestionLoadingContainer = document.createElement('div');
+	suggestionLoadingContainer.classList.add('hide');
+	suggestionLoadingContainer.setAttribute('id', 'loadingContainer');
+
+	let loadingElement = document.createElement('div');
+	loadingElement.classList.add('loading');
+
+	let innerLoadingElement = document.createElement('div');
+	let firstCircle = document.createElement('span');
+	let middleCircle = document.createElement('span');
+	let lastCircle = document.createElement('span');
+	firstCircle.classList.add('large');
+	lastCircle.classList.add('third');
+
+	userSuggestionsContainer.append(suggestionElement);
+	suggestionElement.append(infoElement);
+	suggestionElement.append(saveBtn);
+	suggestionElement.append(suggestionLoadingContainer);
+
+	infoElement.append(nameElement);
+	infoElement.append(addressElement);
+
+	suggestionLoadingContainer.append(loadingElement);
+	loadingElement.append(innerLoadingElement);
+	innerLoadingElement.append(firstCircle);
+	innerLoadingElement.append(middleCircle);
+	innerLoadingElement.append(lastCircle);
+
+	// event listener
+	saveBtn.addEventListener('click', async () => {
+		let contactID = 5;
+		// let contactID = getUserID(contact.owner);
+		// let contactID = parseInt(Object.keys(users).find((key) => users[key].fullname == 'J hhh'));
+
+		saveBtn.classList.add('hide');
+		suggestionLoadingContainer.classList.remove('hide');
+
+		addContactLoadings[contactID] = {
+			interval: setInterval(() => bounceLoading(suggestionLoadingContainer), 300),
+			element: suggestionElement,
 		};
 
 		await userContactContract.create(userID, contactID);
