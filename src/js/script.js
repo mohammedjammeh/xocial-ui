@@ -304,7 +304,10 @@ async function buildPage() {
 	userID = getUserID(clientAddress);
 	user = users.find((u) => u.owner == clientAddress);
 	linkups = await userLinkupContract.getLinkups(userID);
-	userContacts = await userContactContract.getUserContacts(userID);
+	// userContacts = await userContactContract.getContacts(userID);
+	userContacts = await userContactContract.getAll();
+
+	console.log(userContacts);
 
 	// nav
 	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));

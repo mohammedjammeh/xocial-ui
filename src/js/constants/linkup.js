@@ -1,4 +1,4 @@
-export const linkupAddress = '0xB2290542B349F7E01e22dc8BA6BA3dBEAF8ac150';
+export const linkupAddress = '0x07fC2D501Ff5abcc566D2bFf189EB06e5FD69a73';
 
 export const linkupABI = [
 	{
@@ -6,6 +6,7 @@ export const linkupABI = [
 		inputs: [
 			{
 				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'address', name: 'owner', type: 'address' },
 					{ internalType: 'string', name: 'status', type: 'string' },
 					{ internalType: 'string', name: 'description', type: 'string' },
@@ -51,6 +52,7 @@ export const linkupABI = [
 		outputs: [
 			{
 				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'address', name: 'owner', type: 'address' },
 					{ internalType: 'string', name: 'status', type: 'string' },
 					{ internalType: 'string', name: 'description', type: 'string' },
@@ -73,6 +75,7 @@ export const linkupABI = [
 		outputs: [
 			{
 				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'address', name: 'owner', type: 'address' },
 					{ internalType: 'string', name: 'status', type: 'string' },
 					{ internalType: 'string', name: 'description', type: 'string' },
@@ -93,6 +96,7 @@ export const linkupABI = [
 		inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
 		name: 'linkups',
 		outputs: [
+			{ internalType: 'uint256', name: 'id', type: 'uint256' },
 			{ internalType: 'address', name: 'owner', type: 'address' },
 			{ internalType: 'string', name: 'status', type: 'string' },
 			{ internalType: 'string', name: 'description', type: 'string' },

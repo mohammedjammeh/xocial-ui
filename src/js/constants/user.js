@@ -1,4 +1,4 @@
-export const userAddress = '0x08732f981C12c946D5977ec7BDe45f80639070A2';
+export const userAddress = '0xfb8a625F7208EBb128e9F3aAA37ac447A80F8911';
 
 export const userABI = [
 	{
@@ -6,6 +6,7 @@ export const userABI = [
 		inputs: [
 			{
 				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'address', name: 'owner', type: 'address' },
 					{ internalType: 'string', name: 'fullname', type: 'string' },
 					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
@@ -27,6 +28,7 @@ export const userABI = [
 		inputs: [
 			{
 				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'address', name: 'owner', type: 'address' },
 					{ internalType: 'string', name: 'fullname', type: 'string' },
 					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
@@ -67,6 +69,7 @@ export const userABI = [
 		outputs: [
 			{
 				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'address', name: 'owner', type: 'address' },
 					{ internalType: 'string', name: 'fullname', type: 'string' },
 					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
@@ -87,6 +90,7 @@ export const userABI = [
 		outputs: [
 			{
 				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'address', name: 'owner', type: 'address' },
 					{ internalType: 'string', name: 'fullname', type: 'string' },
 					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
@@ -118,6 +122,7 @@ export const userABI = [
 		inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
 		name: 'users',
 		outputs: [
+			{ internalType: 'uint256', name: 'id', type: 'uint256' },
 			{ internalType: 'address', name: 'owner', type: 'address' },
 			{ internalType: 'string', name: 'fullname', type: 'string' },
 		],

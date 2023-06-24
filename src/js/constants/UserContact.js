@@ -1,4 +1,4 @@
-export const userContactAddress = '0xF53166cca9A9D1C4776f751224ee288D4e3266C1';
+export const userContactAddress = '0x88184966d92abf82b1794517e7363Bc966028B5D';
 
 export const userContactABI = [
 	{
@@ -18,7 +18,7 @@ export const userContactABI = [
 					{ internalType: 'bool', name: 'active', type: 'bool' },
 				],
 				indexed: false,
-				internalType: 'struct UserContact.UserContactPivotStruct',
+				internalType: 'struct UserContact.Pivot',
 				name: 'userContact',
 				type: 'tuple',
 			},
@@ -38,7 +38,7 @@ export const userContactABI = [
 					{ internalType: 'bool', name: 'active', type: 'bool' },
 				],
 				indexed: false,
-				internalType: 'struct UserContact.UserContactPivotStruct',
+				internalType: 'struct UserContact.Pivot',
 				name: 'userContact',
 				type: 'tuple',
 			},
@@ -71,6 +71,25 @@ export const userContactABI = [
 		type: 'function',
 	},
 	{
+		inputs: [{ internalType: 'uint256', name: '_user_contact_id', type: 'uint256' }],
+		name: 'get',
+		outputs: [
+			{
+				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
+					{ internalType: 'uint256', name: 'contact_id', type: 'uint256' },
+					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
+					{ internalType: 'bool', name: 'active', type: 'bool' },
+				],
+				internalType: 'struct UserContact.Pivot',
+				name: '',
+				type: 'tuple',
+			},
+		],
+		stateMutability: 'view',
+		type: 'function',
+	},
+	{
 		inputs: [],
 		name: 'getAll',
 		outputs: [
@@ -81,7 +100,7 @@ export const userContactABI = [
 					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
 					{ internalType: 'bool', name: 'active', type: 'bool' },
 				],
-				internalType: 'struct UserContact.UserContactPivotStruct[]',
+				internalType: 'struct UserContact.Pivot[]',
 				name: '',
 				type: 'tuple[]',
 			},
@@ -91,10 +110,11 @@ export const userContactABI = [
 	},
 	{
 		inputs: [{ internalType: 'uint256', name: '_user_id', type: 'uint256' }],
-		name: 'getUserContacts',
+		name: 'getContacts',
 		outputs: [
 			{
 				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'address', name: 'owner', type: 'address' },
 					{ internalType: 'string', name: 'fullname', type: 'string' },
 					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
@@ -110,24 +130,24 @@ export const userContactABI = [
 		type: 'function',
 	},
 	{
-		inputs: [
-			{ internalType: 'uint256', name: '', type: 'uint256' },
-			{ internalType: 'uint256', name: '', type: 'uint256' },
-		],
-		name: 'userContacts',
-		outputs: [{ internalType: 'uint256', name: 'user_id', type: 'uint256' }],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
 		inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-		name: 'userContactsPivot',
+		name: 'pivots',
 		outputs: [
 			{ internalType: 'uint256', name: 'id', type: 'uint256' },
 			{ internalType: 'uint256', name: 'contact_id', type: 'uint256' },
 			{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
 			{ internalType: 'bool', name: 'active', type: 'bool' },
 		],
+		stateMutability: 'view',
+		type: 'function',
+	},
+	{
+		inputs: [
+			{ internalType: 'uint256', name: '', type: 'uint256' },
+			{ internalType: 'uint256', name: '', type: 'uint256' },
+		],
+		name: 'userContacts',
+		outputs: [{ internalType: 'uint256', name: 'user_contact_id', type: 'uint256' }],
 		stateMutability: 'view',
 		type: 'function',
 	},

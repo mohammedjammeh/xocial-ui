@@ -1,4 +1,4 @@
-export const userLinkupAddress = '0xcbE1f53983AB23f64bF0aC9f1210F324f502954c';
+export const userLinkupAddress = '0x263882c23Aa5F57C1F5B4573b31527bb3E4F3699';
 
 export const userLinkupABI = [
 	{
@@ -22,6 +22,25 @@ export const userLinkupABI = [
 		name: 'create',
 		outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
 		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'uint256', name: '_user_linkup_id', type: 'uint256' }],
+		name: 'get',
+		outputs: [
+			{
+				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
+					{ internalType: 'uint256', name: 'linkup_id', type: 'uint256' },
+					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
+					{ internalType: 'string', name: 'response', type: 'string' },
+				],
+				internalType: 'struct UserLinkup.UserLinkupStruct',
+				name: '',
+				type: 'tuple',
+			},
+		],
+		stateMutability: 'view',
 		type: 'function',
 	},
 	{
@@ -49,6 +68,7 @@ export const userLinkupABI = [
 		outputs: [
 			{
 				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'address', name: 'owner', type: 'address' },
 					{ internalType: 'string', name: 'status', type: 'string' },
 					{ internalType: 'string', name: 'description', type: 'string' },
@@ -71,6 +91,7 @@ export const userLinkupABI = [
 		outputs: [
 			{
 				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'address', name: 'owner', type: 'address' },
 					{ internalType: 'string', name: 'fullname', type: 'string' },
 					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
@@ -98,7 +119,7 @@ export const userLinkupABI = [
 			{ internalType: 'uint256', name: '', type: 'uint256' },
 		],
 		name: 'linkups',
-		outputs: [{ internalType: 'uint256', name: 'user_id', type: 'uint256' }],
+		outputs: [{ internalType: 'uint256', name: 'user_linkup_id', type: 'uint256' }],
 		stateMutability: 'view',
 		type: 'function',
 	},
@@ -127,7 +148,7 @@ export const userLinkupABI = [
 			{ internalType: 'uint256', name: '', type: 'uint256' },
 		],
 		name: 'users',
-		outputs: [{ internalType: 'uint256', name: 'linkup_id', type: 'uint256' }],
+		outputs: [{ internalType: 'uint256', name: 'user_linkup_id', type: 'uint256' }],
 		stateMutability: 'view',
 		type: 'function',
 	},
