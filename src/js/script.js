@@ -1,8 +1,9 @@
 import { ethers } from './ethers-5.1.esm.min.js';
 import { sepoliaRpcWss } from './constants/config.js';
-import { linkupAddress, linkupABI } from './constants/linkup.js';
-import { userAddress, userABI } from './constants/user.js';
+import { linkupAddress, linkupABI } from './constants/Linkup.js';
+import { userAddress, userABI } from './constants/User.js';
 import { userContactAddress, userContactABI } from './constants/UserContact.js';
+import { userLinkupAddress, userLinkupABI } from './constants/UserLinkup.js';
 
 if (typeof window.ethereum == 'undefined') {
 	throw new Error('Please install Metamask!');
@@ -28,6 +29,9 @@ const wssUserContract = new ethers.Contract(userAddress, userABI, wssSigner);
 const userContactContract = new ethers.Contract(userContactAddress, userContactABI, windowSigner);
 const wssUserContactContract = new ethers.Contract(userContactAddress, userContactABI, wssSigner);
 
+const userLinkupContract = new ethers.Contract(userLinkupAddress, userLinkupABI, windowSigner);
+const wssUserLinkupContract = new ethers.Contract(userLinkupAddress, userLinkupABI, wssSigner);
+
 // account
 let accounts = await windowProvider.listAccounts();
 let clientAddress = accounts[0] ?? null;
@@ -38,9 +42,13 @@ let users;
 let user;
 let userID;
 let userContacts;
-let linkups = isConnected() ? await linkupContract.getAll() : await unconnectedLinkupContract.getAll();
+let linkups;
 
 // html elements
+let allButtons = document.querySelectorAll('button');
+let allForms = document.querySelectorAll('form');
+let allDateFields = document.querySelectorAll('input[type="date"]');
+
 let navBtns = document.querySelectorAll('nav ul li a');
 let homeBtn = document.getElementById('homeBtn');
 let profileBtn = document.getElementById('profileBtn');
@@ -104,7 +112,7 @@ wssUserContract.on('UserCreated', (u, id) => {
 	users[id.toString()] = u;
 	users = users.filter((value) => Object.keys(value).length !== 0);
 
-	buildPage(users);
+	buildPage();
 });
 
 wssUserContract.on('UserUpdated', (u) => {
@@ -113,7 +121,7 @@ wssUserContract.on('UserUpdated', (u) => {
 
 	users[userID] = u;
 
-	buildPage(users);
+	buildPage();
 });
 
 wssUserContactContract.on(
@@ -141,43 +149,14 @@ wssUserContactContract.on(
 /******************
 	Application
 ******************/
-document.getElementById('startDate').value = getTodayDate();
-
-let allButtons = document.querySelectorAll('button');
-let allForms = document.querySelectorAll('form');
-
+allDateFields.forEach((field) => (field.value = getTodayDate()));
 allButtons.forEach((btn) => [btn.addEventListener('click', (event) => event.preventDefault())]);
 allForms.forEach((form) => [form.addEventListener('submit', (event) => event.preventDefault())]);
 
-if (!isConnected()) {
-	// nav
-	navBtns.forEach((btn) => btn.addEventListener('click', connect));
-
-	connectBtn.classList.remove('hide');
-	setInterval(() => swingAttentionCircle(connectBtn), 800);
-
-	// suggestions
-	userSuggestionsBtns.forEach((btn) => btn.addEventListener('click', connect));
-
-	// linkup
-	linkupForm.addEventListener('submit', () => connect());
-
-	linkups.forEach((linkup) => prependLinkUp(linkup));
-
-	let broadcastForms = document.querySelectorAll('.broadcastForm form');
-	broadcastForms.forEach((form) => {
-		form.addEventListener('submit', () => connect());
-	});
-
-	let joinBtns = document.querySelectorAll('.linkup .joinBtn button');
-	joinBtns.forEach((btn) => btn.addEventListener('click', connect));
+if (isConnected()) {
+	buildPage();
 } else {
-	users = await userContract.getAll();
-	users = [...users];
-	userContacts = await userContactContract.getAll();
-	userContacts = [...userContacts];
-
-	buildPage(users);
+	connectListenerForButtons();
 }
 
 /******************
@@ -292,9 +271,40 @@ function bounceLoading(loadingContainer) {
 	largeLoadingElement.classList.remove('large');
 }
 
-async function buildPage(users) {
-	user = users.find((u) => u.owner == clientAddress);
+async function connectListenerForButtons() {
+	//data
+	linkups = await unconnectedLinkupContract.getAll();
+
+	// nav
+	navBtns.forEach((btn) => btn.addEventListener('click', connect));
+
+	connectBtn.classList.remove('hide');
+	setInterval(() => swingAttentionCircle(connectBtn), 800);
+
+	// suggestions
+	userSuggestionsBtns.forEach((btn) => btn.addEventListener('click', connect));
+
+	// linkup
+	linkupForm.addEventListener('submit', () => connect());
+
+	linkups.forEach((linkup) => prependLinkUp(linkup));
+
+	let broadcastForms = document.querySelectorAll('.broadcastForm form');
+	broadcastForms.forEach((form) => {
+		form.addEventListener('submit', () => connect());
+	});
+
+	let joinBtns = document.querySelectorAll('.linkup .joinBtn button');
+	joinBtns.forEach((btn) => btn.addEventListener('click', connect));
+}
+
+async function buildPage() {
+	// data
+	users = await userContract.getAll();
 	userID = getUserID(clientAddress);
+	user = users.find((u) => u.owner == clientAddress);
+	linkups = await userLinkupContract.getLinkups(userID);
+	userContacts = await userContactContract.getUserContacts(userID);
 
 	// nav
 	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
@@ -320,7 +330,7 @@ async function buildPage(users) {
 	});
 	profileFormCancelBtn.addEventListener('click', () => disableUserFormExcept(profileFormEditBtn));
 
-	// contact (add check - contact belongs to user)
+	// contact
 	userContacts.forEach((userContact) => {
 		if (userContact.active) {
 			let contactID = userContact.contact_id.toNumber();

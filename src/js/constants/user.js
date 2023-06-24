@@ -1,4 +1,4 @@
-export const userAddress = '0x0C0530f807fEeEF09b4b03008F0d825c74e872C8';
+export const userAddress = '0x08732f981C12c946D5977ec7BDe45f80639070A2';
 
 export const userABI = [
 	{
@@ -59,6 +59,26 @@ export const userABI = [
 		name: 'create',
 		outputs: [],
 		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'uint256', name: '_user_id', type: 'uint256' }],
+		name: 'get',
+		outputs: [
+			{
+				components: [
+					{ internalType: 'address', name: 'owner', type: 'address' },
+					{ internalType: 'string', name: 'fullname', type: 'string' },
+					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
+					{ internalType: 'string[]', name: 'foodTaste', type: 'string[]' },
+					{ internalType: 'string[]', name: 'sportsTaste', type: 'string[]' },
+				],
+				internalType: 'struct User.UserStruct',
+				name: '',
+				type: 'tuple',
+			},
+		],
+		stateMutability: 'view',
 		type: 'function',
 	},
 	{
