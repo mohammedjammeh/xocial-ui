@@ -41,7 +41,7 @@ let clientAddress = accounts[0] ?? null;
 let users;
 let user;
 let userID;
-let userContacts;
+let contacts;
 let linkups;
 
 // html elements
@@ -199,16 +199,8 @@ function getLinkupID(linkupToFind) {
 	});
 }
 
-function getActiveContactIDs() {
-	return userContacts
-		.map((userContact) => {
-			if (!userContact.active) {
-				return;
-			}
-
-			return userContact.contact_id.toNumber();
-		})
-		.filter((userContact) => userContact != undefined);
+function getIDs(items) {
+	return items.map((item) => item.id.toNumber());
 }
 
 function getTodayDate() {
@@ -304,10 +296,7 @@ async function buildPage() {
 	userID = getUserID(clientAddress);
 	user = users.find((u) => u.owner == clientAddress);
 	linkups = await userLinkupContract.getLinkups(userID);
-	// userContacts = await userContactContract.getContacts(userID);
-	userContacts = await userContactContract.getAll();
-
-	console.log(userContacts);
+	contacts = await userContactContract.getContacts(userID);
 
 	// nav
 	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
@@ -334,19 +323,14 @@ async function buildPage() {
 	profileFormCancelBtn.addEventListener('click', () => disableUserFormExcept(profileFormEditBtn));
 
 	// contact
-	userContacts.forEach((userContact) => {
-		if (userContact.active) {
-			let contactID = userContact.contact_id.toNumber();
-			buildContactList(users[contactID]);
-		}
-	});
+	contacts.forEach((contact) => buildContactList(contact));
 	contactSearchBtn.addEventListener('click', () => search());
 
 	// user suggestions
-	let activeContactIDs = getActiveContactIDs();
+	let contactIDs = getIDs(contacts);
 	let contactSuggestions = users.filter((suggestion, id) => {
-		// return !activeContactIDs.includes(id) && suggestion.owner !== clientAddress;
-		return !activeContactIDs.includes(id);
+		// return !contactIDs.includes(id) && suggestion.owner !== clientAddress;
+		return !contactIDs.includes(id);
 	});
 	contactSuggestions.forEach((suggestion) => buildUserSuggestion(suggestion));
 }
@@ -604,11 +588,11 @@ function search() {
 		return;
 	}
 
-	let activeContactIDs = getActiveContactIDs();
+	let contactIDs = getIDs(contacts);
 	let searchUsers = users.filter((searchUser) => {
 		return (
 			searchUser.fullname.toLowerCase().includes(searchValue) &&
-			!activeContactIDs.includes(getUserID(searchUser.owner))
+			!contactIDs.includes(getUserID(searchUser.owner))
 		);
 	});
 
