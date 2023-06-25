@@ -126,8 +126,8 @@ wssUserContract.on('UserUpdated', (u) => {
 
 wssUserContactContract.on(
 	wssUserContactContract.filters.UserContactCreated(clientAddress),
-	(log, event) => {
-		let contactID = event.contact_id.toNumber();
+	(log, response) => {
+		let contactID = response.toNumber();
 
 		addContactLoadings[contactID].element.remove();
 		clearInterval(addContactLoadings[contactID].interval);
@@ -138,8 +138,8 @@ wssUserContactContract.on(
 
 wssUserContactContract.on(
 	wssUserContactContract.filters.UserContactDestroyed(clientAddress),
-	(log, event) => {
-		let contactID = event.contact_id.toNumber();
+	(log, response) => {
+		let contactID = response.toNumber();
 
 		removeContactLoadings[contactID].element.remove();
 		clearInterval(removeContactLoadings[contactID].interval);
@@ -614,8 +614,8 @@ function buildContactList(contact) {
 	contactList.append(element);
 
 	btn.addEventListener('click', async () => {
-		let contactID = 5;
-		// let contactID = getUserID(contact.owner);
+		let contactID = 1;
+		// let contactID = contact.id;
 
 		replaceButtonWithLoading(btn, loadingContainer);
 		removeContactLoadings[contactID] = {
@@ -623,7 +623,7 @@ function buildContactList(contact) {
 			element: element,
 		};
 
-		await userContactContract.destroy(getUserContactID(contactID));
+		await userContactContract.destroy(userID, contactID);
 	});
 }
 
@@ -636,9 +636,8 @@ function buildSearchList(contact) {
 	contactSearchList.append(element);
 
 	btn.addEventListener('click', async () => {
-		let contactID = 4;
-		// let contactID = getUserID(contact.owner);
-		// let contactID = parseInt(Object.keys(users).find((key) => users[key].fullname == 'J hhh'));]
+		let contactID = 1;
+		// let contactID = contact.id;
 
 		replaceButtonWithLoading(btn, loadingContainer);
 		addContactLoadings[contactID] = {
@@ -705,19 +704,30 @@ function buildUserSuggestion(suggestion) {
 	let infoElement = newElement('div', 'info');
 	let nameElement = newElement('p', '', suggestion.fullname);
 	let addressElement = newElement('p', '', suggestion.owner);
-	let saveBtn = newElement('button', '', 'Save');
+	let btn = newElement('button', '', 'Save');
 
-	let suggestionLoadingContainer = createLoadingContainter();
+	let loadingContainer = createLoadingContainter();
 
 	userSuggestionsContainer.append(suggestionItem);
 	suggestionItem.append(infoElement);
-	suggestionItem.append(saveBtn);
-	suggestionItem.append(suggestionLoadingContainer);
+	suggestionItem.append(btn);
+	suggestionItem.append(loadingContainer);
 
 	infoElement.append(nameElement);
 	infoElement.append(addressElement);
 
-	saveBtn.addEventListener('click', async () =>
-		addContact(suggestion, saveBtn, suggestionLoadingContainer, suggestionItem)
-	);
+	btn.addEventListener('click', async () => {
+		// addContact(suggestion, saveBtn, loadingContainer, suggestionItem);
+
+		let contactID = 2;
+		// let contactID = suggestion.id;
+
+		replaceButtonWithLoading(btn, loadingContainer);
+		addContactLoadings[contactID] = {
+			interval: setInterval(() => bounceLoading(loadingContainer), 300),
+			element: suggestionItem,
+		};
+
+		await userContactContract.create(userID, contactID);
+	});
 }

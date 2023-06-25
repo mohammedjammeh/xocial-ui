@@ -1,4 +1,4 @@
-export const userContactAddress = '0x88184966d92abf82b1794517e7363Bc966028B5D';
+export const userContactAddress = '0xeaC52AEb34e2Ec1493a97F99463C7Fc0c561d330';
 
 export const userContactABI = [
 	{
@@ -10,18 +10,7 @@ export const userContactABI = [
 		anonymous: false,
 		inputs: [
 			{ indexed: true, internalType: 'address', name: 'to', type: 'address' },
-			{
-				components: [
-					{ internalType: 'uint256', name: 'id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'contact_id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
-					{ internalType: 'bool', name: 'active', type: 'bool' },
-				],
-				indexed: false,
-				internalType: 'struct UserContact.Pivot',
-				name: 'userContact',
-				type: 'tuple',
-			},
+			{ indexed: false, internalType: 'uint256', name: 'contactID', type: 'uint256' },
 		],
 		name: 'UserContactCreated',
 		type: 'event',
@@ -30,28 +19,10 @@ export const userContactABI = [
 		anonymous: false,
 		inputs: [
 			{ indexed: true, internalType: 'address', name: 'to', type: 'address' },
-			{
-				components: [
-					{ internalType: 'uint256', name: 'id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'contact_id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
-					{ internalType: 'bool', name: 'active', type: 'bool' },
-				],
-				indexed: false,
-				internalType: 'struct UserContact.Pivot',
-				name: 'userContact',
-				type: 'tuple',
-			},
+			{ indexed: false, internalType: 'uint256', name: 'contactID', type: 'uint256' },
 		],
 		name: 'UserContactDestroyed',
 		type: 'event',
-	},
-	{
-		inputs: [],
-		name: 'count',
-		outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-		stateMutability: 'view',
-		type: 'function',
 	},
 	{
 		inputs: [
@@ -64,48 +35,13 @@ export const userContactABI = [
 		type: 'function',
 	},
 	{
-		inputs: [{ internalType: 'uint256', name: '_user_contact_id', type: 'uint256' }],
+		inputs: [
+			{ internalType: 'uint256', name: '_user_id', type: 'uint256' },
+			{ internalType: 'uint256', name: '_contact_id', type: 'uint256' },
+		],
 		name: 'destroy',
 		outputs: [],
 		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
-		inputs: [{ internalType: 'uint256', name: '_user_contact_id', type: 'uint256' }],
-		name: 'get',
-		outputs: [
-			{
-				components: [
-					{ internalType: 'uint256', name: 'id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'contact_id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
-					{ internalType: 'bool', name: 'active', type: 'bool' },
-				],
-				internalType: 'struct UserContact.Pivot',
-				name: '',
-				type: 'tuple',
-			},
-		],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
-		inputs: [],
-		name: 'getAll',
-		outputs: [
-			{
-				components: [
-					{ internalType: 'uint256', name: 'id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'contact_id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
-					{ internalType: 'bool', name: 'active', type: 'bool' },
-				],
-				internalType: 'struct UserContact.Pivot[]',
-				name: '',
-				type: 'tuple[]',
-			},
-		],
-		stateMutability: 'view',
 		type: 'function',
 	},
 	{
@@ -130,24 +66,12 @@ export const userContactABI = [
 		type: 'function',
 	},
 	{
-		inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-		name: 'pivots',
-		outputs: [
-			{ internalType: 'uint256', name: 'id', type: 'uint256' },
-			{ internalType: 'uint256', name: 'contact_id', type: 'uint256' },
-			{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
-			{ internalType: 'bool', name: 'active', type: 'bool' },
-		],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
 		inputs: [
 			{ internalType: 'uint256', name: '', type: 'uint256' },
 			{ internalType: 'uint256', name: '', type: 'uint256' },
 		],
 		name: 'userContacts',
-		outputs: [{ internalType: 'uint256', name: 'user_contact_id', type: 'uint256' }],
+		outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
 		stateMutability: 'view',
 		type: 'function',
 	},
