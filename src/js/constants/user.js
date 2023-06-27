@@ -1,11 +1,6 @@
-export const userAddress = '0xC2BD0d773413447Ca3d371e44c449090a5b39819';
+export const userAddress = '0xd68B8efC87FE3a736ad4916dF2651E19a79cf937';
 
 export const userABI = [
-	{
-		inputs: [{ internalType: 'address[]', name: 'addresses', type: 'address[]' }],
-		stateMutability: 'nonpayable',
-		type: 'constructor',
-	},
 	{
 		anonymous: false,
 		inputs: [
@@ -111,27 +106,6 @@ export const userABI = [
 		type: 'function',
 	},
 	{
-		inputs: [{ internalType: 'uint256', name: '_linkup_id', type: 'uint256' }],
-		name: 'getAllForLinkup',
-		outputs: [
-			{
-				components: [
-					{ internalType: 'uint256', name: 'id', type: 'uint256' },
-					{ internalType: 'address', name: 'owner', type: 'address' },
-					{ internalType: 'string', name: 'fullname', type: 'string' },
-					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
-					{ internalType: 'string[]', name: 'foodTaste', type: 'string[]' },
-					{ internalType: 'string[]', name: 'sportsTaste', type: 'string[]' },
-				],
-				internalType: 'struct User.UserStruct[]',
-				name: '',
-				type: 'tuple[]',
-			},
-		],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
 		inputs: [
 			{ internalType: 'uint256', name: '_id', type: 'uint256' },
 			{ internalType: 'string', name: '_fullname', type: 'string' },
@@ -142,13 +116,6 @@ export const userABI = [
 		name: 'update',
 		outputs: [],
 		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
-		inputs: [],
-		name: 'userLinkupContract',
-		outputs: [{ internalType: 'contract UserLinkup', name: '', type: 'address' }],
-		stateMutability: 'view',
 		type: 'function',
 	},
 	{

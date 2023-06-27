@@ -95,44 +95,63 @@ window.ethereum.on('accountsChanged', async function () {
 	location.reload();
 });
 
-// linkup - just emit address and linkup..
+// linkup - (UserLinkupCreated)
 wssUserLinkupContract.on(
-	wssUserLinkupContract.filters.NewUserLinkup(getUserID(clientAddress)),
-	async (log, response) => {
-		console.log('zol');
+	wssUserLinkupContract.filters.NewUserLinkup(clientAddress),
+	async (log, linkup) => {
+		prependLinkUp(linkup);
 
-		// let linkup = await linkupContract.get(response.toNumber());
-		// prependLinkUp(linkup);
-		// replaceLoadingWithButton(linkupFormBtn, linkupFormLoadingContainer);
-		// clearInterval(linkupFormLoadingInterval);
-		// resetLinkUpForm();
+		replaceLoadingWithButton(linkupFormBtn, linkupFormLoadingContainer);
+		clearInterval(linkupFormLoadingInterval);
+
+		resetLinkUpForm();
 	}
 );
 
-// user
-wssUserContract.on('UserCreated', (u, id) => {
+// user,
+// wssUserContract.on('UserCreated', (u, id) => {
+// 	profileBtn.children[1].classList.remove('dot');
+// 	clearInterval(profileNavAttentionInterval);
+
+// 	users[id.toString()] = u;
+// 	users = users.filter((value) => Object.keys(value).length !== 0);
+
+// 	buildPage(users);
+// });
+
+wssUserContract.on(wssUserContract.filters.UserCreated(clientAddress), (log, user) => {
+	console.log('looool');
+
 	profileBtn.children[1].classList.remove('dot');
 	clearInterval(profileNavAttentionInterval);
 
-	users[id.toString()] = u;
+	users[user.id] = user;
 	users = users.filter((value) => Object.keys(value).length !== 0);
 
-	buildPage();
+	buildPage(users);
 });
 
-wssUserContract.on('UserUpdated', (u) => {
+// wssUserContract.on('UserUpdated', (u) => {
+// 	profileFormLoadingContainer.classList.add('hide');
+// 	clearInterval(profileFormLoadingInterval);
+
+// 	users[userID] = u;
+
+// 	buildPage(users);
+// });
+
+wssUserContract.on(wssUserContract.filters.UserUpdated(clientAddress), (log, user) => {
+	console.log('looool');
+
 	profileFormLoadingContainer.classList.add('hide');
+
 	clearInterval(profileFormLoadingInterval);
 
-	// find out how to only emit after data
-	// stored or check if the data is cached
-	// probably userID hasn't been set yet
-
-	users[userID] = u;
-
-	buildPage();
+	users[userID] = user;
+	buildPage(users);
 });
 
+// contacts
 wssUserContactContract.on(
 	wssUserContactContract.filters.UserContactCreated(clientAddress),
 	(log, response) => {
@@ -163,7 +182,9 @@ allButtons.forEach((btn) => [btn.addEventListener('click', (event) => event.prev
 allForms.forEach((form) => [form.addEventListener('submit', (event) => event.preventDefault())]);
 
 if (isConnected()) {
-	buildPage();
+	users = await userContract.getAll();
+	users = [...users];
+	buildPage(users);
 } else {
 	connectListenerForButtons();
 }
@@ -208,13 +229,11 @@ async function connectListenerForButtons() {
 	joinBtns.forEach((btn) => btn.addEventListener('click', connect));
 }
 
-async function buildPage() {
+async function buildPage(users) {
 	// data
-	users = await userContract.getAll();
-	users = [...users];
 	userID = getUserID(clientAddress);
 	user = users.find((u) => u.owner == clientAddress);
-	linkups = await linkupContract.getAllForUser(userID);
+	linkups = await userLinkupContract.getUserLinkups(userID);
 	contacts = await userContactContract.getContacts(userID);
 
 	// nav
@@ -367,7 +386,7 @@ async function createLinkup(event) {
 	replaceButtonWithLoading(linkupFormBtn, linkupFormLoadingContainer);
 	linkupFormLoadingInterval = setInterval(() => bounceLoading(linkupFormLoadingContainer), 300);
 
-	await linkupContract.create(
+	await userLinkupContract.createLinkupPlusUserLinkup(
 		document.getElementById('type').value,
 		document.getElementById('description').value,
 		document.getElementById('location').value,
@@ -388,7 +407,7 @@ function resetLinkUpForm() {
 }
 
 async function prependLinkUp(linkup) {
-	let linkupUsers = await userContract.getAllForLinkup(linkup.id.toNumber());
+	let linkupUsers = await userLinkupContract.getLinkupUsers(linkup.id.toNumber());
 	let userContacts = await userContactContract.getContacts(userID);
 
 	let linkupElement = newElement('div', ['linkup', 'columnContainer']);
