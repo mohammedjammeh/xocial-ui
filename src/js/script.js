@@ -57,6 +57,7 @@ let profileNavAttentionInterval;
 
 let linkupContainer = document.querySelectorAll('.linkups')[0];
 let linkupForm = document.getElementById('linkupForm');
+let linkupFormContacts = linkupForm.querySelector('#contacts');
 let linkupFormBtn = linkupForm.querySelector('input[type="submit"]');
 let linkupFormLoadingContainer = linkupForm.querySelector('#loadingContainer');
 let linkupFormLoadingInterval;
@@ -94,17 +95,21 @@ window.ethereum.on('accountsChanged', async function () {
 	location.reload();
 });
 
-wssLinkupContract.on('NewLinkup', (linkup) => {
-	prependLinkUp(linkup);
+// linkup - just emit address and linkup..
+wssUserLinkupContract.on(
+	wssUserLinkupContract.filters.NewUserLinkup(getUserID(clientAddress)),
+	async (log, response) => {
+		console.log('zol');
 
-	linkupFormLoadingContainer.classList.add('hide');
-	clearInterval(linkupFormLoadingInterval);
+		// let linkup = await linkupContract.get(response.toNumber());
+		// prependLinkUp(linkup);
+		// replaceLoadingWithButton(linkupFormBtn, linkupFormLoadingContainer);
+		// clearInterval(linkupFormLoadingInterval);
+		// resetLinkUpForm();
+	}
+);
 
-	linkupFormBtn.classList.remove('hide');
-
-	resetLinkUpForm();
-});
-
+// user
 wssUserContract.on('UserCreated', (u, id) => {
 	profileBtn.children[1].classList.remove('dot');
 	clearInterval(profileNavAttentionInterval);
@@ -118,6 +123,10 @@ wssUserContract.on('UserCreated', (u, id) => {
 wssUserContract.on('UserUpdated', (u) => {
 	profileFormLoadingContainer.classList.add('hide');
 	clearInterval(profileFormLoadingInterval);
+
+	// find out how to only emit after data
+	// stored or check if the data is cached
+	// probably userID hasn't been set yet
 
 	users[userID] = u;
 
@@ -172,18 +181,84 @@ async function connect() {
 	connectBtn.classList.add('hide');
 }
 
-function getUserID(address) {
-	return parseInt(Object.keys(users).find((key) => users[key].owner == address));
+async function connectListenerForButtons() {
+	//data
+	linkups = await unconnectedLinkupContract.getAll();
+
+	// nav
+	navBtns.forEach((btn) => btn.addEventListener('click', connect));
+
+	connectBtn.classList.remove('hide');
+	setInterval(() => swingAttentionCircle(connectBtn), 800);
+
+	// suggestions
+	userSuggestionsBtns.forEach((btn) => btn.addEventListener('click', connect));
+
+	// linkup
+	linkupForm.addEventListener('submit', () => connect());
+
+	linkups.forEach((linkup) => prependLinkUp(linkup));
+
+	let broadcastForms = document.querySelectorAll('.broadcastForm form');
+	broadcastForms.forEach((form) => {
+		form.addEventListener('submit', () => connect());
+	});
+
+	let joinBtns = document.querySelectorAll('.linkup .joinBtn button');
+	joinBtns.forEach((btn) => btn.addEventListener('click', connect));
 }
 
-function getUserContactID(contactID) {
-	return Object.keys(userContacts).find((key) => {
-		let userContact = userContacts[key];
+async function buildPage() {
+	// data
+	users = await userContract.getAll();
+	users = [...users];
+	userID = getUserID(clientAddress);
+	user = users.find((u) => u.owner == clientAddress);
+	linkups = await linkupContract.getAllForUser(userID);
+	contacts = await userContactContract.getContacts(userID);
 
-		return (
-			userContact.user_id == userID && userContact.contact_id == contactID && userContact.active == true
-		);
+	// nav
+	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
+	profileBtn.addEventListener('click', () => goToView(userContainer, profileBtn));
+
+	// linkup
+	linkupForm.addEventListener('submit', (event) => createLinkup(event));
+	linkups.forEach((linkup) => prependLinkUp(linkup));
+
+	// profile
+	if (!user) {
+		profileNavAttentionInterval = setInterval(() => swingAttentionCircle(profileBtn), 800);
+		profileFormSaveBtn.addEventListener('click', () => createUser());
+		return;
+	}
+
+	prefillUserForm(user);
+	disableUserFormExcept(profileFormEditBtn);
+	profileFormEditBtn.addEventListener('click', () => enableUserForm());
+	profileFormUpdateBtn.addEventListener('click', () => {
+		updateUser(userID);
+		disableUserFormExcept();
 	});
+	profileFormCancelBtn.addEventListener('click', () => disableUserFormExcept(profileFormEditBtn));
+
+	// contact
+	contacts.forEach((contact) => {
+		buildContactList(contact);
+		appendToLinkupForm(contact);
+	});
+	contactSearchBtn.addEventListener('click', () => search());
+
+	// user suggestions
+	let contactIDs = getIDs(contacts);
+	let contactSuggestions = users.filter((suggestion, id) => {
+		// return !contactIDs.includes(id) && suggestion.owner !== clientAddress;
+		return !contactIDs.includes(id);
+	});
+	contactSuggestions.forEach((suggestion) => buildUserSuggestion(suggestion));
+}
+
+function getUserID(address) {
+	return parseInt(Object.keys(users).find((key) => users[key].owner == address));
 }
 
 function getLinkupID(linkupToFind) {
@@ -263,78 +338,6 @@ function bounceLoading(loadingContainer) {
 	largeLoadingElement.classList.remove('large');
 }
 
-async function connectListenerForButtons() {
-	//data
-	linkups = await unconnectedLinkupContract.getAll();
-
-	// nav
-	navBtns.forEach((btn) => btn.addEventListener('click', connect));
-
-	connectBtn.classList.remove('hide');
-	setInterval(() => swingAttentionCircle(connectBtn), 800);
-
-	// suggestions
-	userSuggestionsBtns.forEach((btn) => btn.addEventListener('click', connect));
-
-	// linkup
-	linkupForm.addEventListener('submit', () => connect());
-
-	linkups.forEach((linkup) => prependLinkUp(linkup));
-
-	let broadcastForms = document.querySelectorAll('.broadcastForm form');
-	broadcastForms.forEach((form) => {
-		form.addEventListener('submit', () => connect());
-	});
-
-	let joinBtns = document.querySelectorAll('.linkup .joinBtn button');
-	joinBtns.forEach((btn) => btn.addEventListener('click', connect));
-}
-
-async function buildPage() {
-	// data
-	users = await userContract.getAll();
-	userID = getUserID(clientAddress);
-	user = users.find((u) => u.owner == clientAddress);
-	linkups = await userLinkupContract.getLinkups(userID);
-	contacts = await userContactContract.getContacts(userID);
-
-	// nav
-	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
-	profileBtn.addEventListener('click', () => goToView(userContainer, profileBtn));
-
-	// linkup
-	linkupForm.addEventListener('submit', (event) => createLinkup(event));
-	linkups.forEach((linkup) => prependLinkUp(linkup));
-
-	// profile
-	if (!user) {
-		profileNavAttentionInterval = setInterval(() => swingAttentionCircle(profileBtn), 800);
-		profileFormSaveBtn.addEventListener('click', () => createUser());
-		return;
-	}
-
-	prefillUserForm(user);
-	disableUserFormExcept(profileFormEditBtn);
-	profileFormEditBtn.addEventListener('click', () => enableUserForm());
-	profileFormUpdateBtn.addEventListener('click', () => {
-		updateUser(userID);
-		disableUserFormExcept();
-	});
-	profileFormCancelBtn.addEventListener('click', () => disableUserFormExcept(profileFormEditBtn));
-
-	// contact
-	contacts.forEach((contact) => buildContactList(contact));
-	contactSearchBtn.addEventListener('click', () => search());
-
-	// user suggestions
-	let contactIDs = getIDs(contacts);
-	let contactSuggestions = users.filter((suggestion, id) => {
-		// return !contactIDs.includes(id) && suggestion.owner !== clientAddress;
-		return !contactIDs.includes(id);
-	});
-	contactSuggestions.forEach((suggestion) => buildUserSuggestion(suggestion));
-}
-
 // nav attention
 function swingAttentionCircle(btn) {
 	btn.children[1].classList.add('dot');
@@ -358,7 +361,6 @@ async function createLinkup(event) {
 	let startDate = document.getElementById('startDate').value;
 	let startTime = document.getElementById('startTime').value;
 	let endTime = document.getElementById('endTime').value;
-	let to = document.getElementById('to').value;
 	let startTimeUnix = Date.parse(startDate + ' ' + startTime + ':00') / 1000;
 	let endTimeUnix = Date.parse(startDate + ' ' + endTime + ':00') / 1000;
 
@@ -366,13 +368,13 @@ async function createLinkup(event) {
 	linkupFormLoadingInterval = setInterval(() => bounceLoading(linkupFormLoadingContainer), 300);
 
 	await linkupContract.create(
-		'0x0A2169dfcC633289285290a61BB4d10AFA131817',
 		document.getElementById('type').value,
 		document.getElementById('description').value,
 		document.getElementById('location').value,
 		startTimeUnix,
 		endTimeUnix,
-		['0x0A2169dfcC633289285290a61BB4d10AFA131817', '0x0A2169dfcC633289285290a61BB4d10AFA131817']
+		userID,
+		document.getElementById('contacts').value
 	);
 }
 
@@ -385,7 +387,10 @@ function resetLinkUpForm() {
 	document.getElementById('endTime').value = '23:59';
 }
 
-function prependLinkUp(linkup) {
+async function prependLinkUp(linkup) {
+	let linkupUsers = await userContract.getAllForLinkup(linkup.id.toNumber());
+	let userContacts = await userContactContract.getContacts(userID);
+
 	let linkupElement = newElement('div', ['linkup', 'columnContainer']);
 	linkupContainer.prepend(linkupElement);
 
@@ -413,8 +418,8 @@ function prependLinkUp(linkup) {
 	let membersContainer = newElement('ul', 'members');
 	linkupElement.appendChild(membersContainer);
 
-	linkup.attendees.forEach((member) => {
-		let memberElement = newElement('li', '', 'Alhaji Mballow');
+	linkupUsers.forEach((linkupUser) => {
+		let memberElement = newElement('li', '', linkupUser.fullname);
 		membersContainer.append(memberElement);
 
 		let memberIconElement = newElement('i', ['fa-regular', 'fa-circle-check']);
@@ -428,9 +433,9 @@ function prependLinkUp(linkup) {
 	let broadcastFormElement = newElement('form');
 	let toElement = newElement('select');
 
-	linkup.attendees.forEach((member) => {
-		let toOptionElement = newElement('option', '', 'Elliot Mass');
-		toOptionElement.value = 'yooo';
+	userContacts.forEach((userContact) => {
+		let toOptionElement = newElement('option', '', userContact.fullname);
+		toOptionElement.value = userContact.id.toNumber();
 		toElement.append(toOptionElement);
 	});
 
@@ -494,6 +499,14 @@ function formatMoment(linkup) {
 		':' +
 		endMins
 	);
+}
+
+function appendToLinkupForm(contact) {
+	let contactOption = newElement('option', '', contact.fullname);
+	contactOption.value = contact.id;
+	contactOption.innerHTML = contact.fullname;
+
+	linkupFormContacts.appendChild(contactOption);
 }
 
 // profile
@@ -566,6 +579,11 @@ async function createUser() {
 function replaceButtonWithLoading(btn, loadingContainer) {
 	btn.classList.add('hide');
 	loadingContainer.classList.remove('hide');
+}
+
+function replaceLoadingWithButton(btn, loadingContainer) {
+	btn.classList.remove('hide');
+	loadingContainer.classList.add('hide');
 }
 
 function getSelected(fieldName) {
@@ -717,8 +735,6 @@ function buildUserSuggestion(suggestion) {
 	infoElement.append(addressElement);
 
 	btn.addEventListener('click', async () => {
-		// addContact(suggestion, saveBtn, loadingContainer, suggestionItem);
-
 		let contactID = 2;
 		// let contactID = suggestion.id;
 
