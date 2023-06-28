@@ -437,7 +437,13 @@ async function prependLinkUp(linkup) {
 	let broadcastFormElement = newElement('form');
 	let toElement = newElement('select');
 
+	let linkupUsersIDs = linkupUsers.map((linkupUser) => linkupUser.id.toNumber());
+
 	userContacts.forEach((userContact) => {
+		if (linkupUsersIDs.includes(userContact.id.toNumber())) {
+			return;
+		}
+
 		let toOptionElement = newElement('option', '', userContact.fullname);
 		toOptionElement.value = userContact.id.toNumber();
 		toElement.append(toOptionElement);
