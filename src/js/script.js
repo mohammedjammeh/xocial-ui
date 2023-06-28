@@ -95,9 +95,9 @@ window.ethereum.on('accountsChanged', async function () {
 	location.reload();
 });
 
-// linkup - (UserLinkupCreated)
+// linkup
 wssUserLinkupContract.on(
-	wssUserLinkupContract.filters.NewUserLinkup(clientAddress),
+	wssUserLinkupContract.filters.UserLinkupCreated(clientAddress),
 	async (log, linkup) => {
 		prependLinkUp(linkup);
 
@@ -108,20 +108,8 @@ wssUserLinkupContract.on(
 	}
 );
 
-// user,
-// wssUserContract.on('UserCreated', (u, id) => {
-// 	profileBtn.children[1].classList.remove('dot');
-// 	clearInterval(profileNavAttentionInterval);
-
-// 	users[id.toString()] = u;
-// 	users = users.filter((value) => Object.keys(value).length !== 0);
-
-// 	buildPage(users);
-// });
-
+// user
 wssUserContract.on(wssUserContract.filters.UserCreated(clientAddress), (log, user) => {
-	console.log('looool');
-
 	profileBtn.children[1].classList.remove('dot');
 	clearInterval(profileNavAttentionInterval);
 
@@ -131,20 +119,8 @@ wssUserContract.on(wssUserContract.filters.UserCreated(clientAddress), (log, use
 	buildPage(users);
 });
 
-// wssUserContract.on('UserUpdated', (u) => {
-// 	profileFormLoadingContainer.classList.add('hide');
-// 	clearInterval(profileFormLoadingInterval);
-
-// 	users[userID] = u;
-
-// 	buildPage(users);
-// });
-
 wssUserContract.on(wssUserContract.filters.UserUpdated(clientAddress), (log, user) => {
-	console.log('looool');
-
 	profileFormLoadingContainer.classList.add('hide');
-
 	clearInterval(profileFormLoadingInterval);
 
 	users[userID] = user;
@@ -280,19 +256,6 @@ function getUserID(address) {
 	return parseInt(Object.keys(users).find((key) => users[key].owner == address));
 }
 
-function getLinkupID(linkupToFind) {
-	return Object.keys(linkups).find((key) => {
-		return (
-			linkups[key].owner == linkupToFind.owner &&
-			linkups[key].status == linkupToFind.status &&
-			linkups[key].description == linkupToFind.description &&
-			linkups[key].location == linkupToFind.location &&
-			linkups[key].startTime == linkupToFind.startTime &&
-			linkups[key].endTime == linkupToFind.endTime
-		);
-	});
-}
-
 function getIDs(items) {
 	return items.map((item) => item.id.toNumber());
 }
@@ -407,7 +370,9 @@ function resetLinkUpForm() {
 }
 
 async function prependLinkUp(linkup) {
-	let linkupUsers = await userLinkupContract.getLinkupUsers(linkup.id.toNumber());
+	let linkupID = linkup.id.toNumber();
+	let linkupUsers = await userLinkupContract.getLinkupUsers(linkupID);
+	let linkupUserPivots = await userLinkupContract.getLinkupUserPivots(linkupID);
 	let userContacts = await userContactContract.getContacts(userID);
 
 	let linkupElement = newElement('div', ['linkup', 'columnContainer']);
@@ -433,6 +398,21 @@ async function prependLinkUp(linkup) {
 	let descriptionElement = newElement('p', 'description', ' ' + linkup.description);
 	linkupElement.appendChild(descriptionElement);
 
+	// broadcasted by
+	let currentUserLinkup = getUserLinkup(linkupUserPivots, linkupID, userID);
+	let linkupFromUserID = currentUserLinkup.from_user_id.toNumber();
+	let broadcastedByText;
+
+	if (linkupFromUserID == userID) {
+		broadcastedByText = 'Belongs to you';
+	} else {
+		let linkupFromUser = await userContract.get(linkupFromUserID);
+		broadcastedByText = 'Broadcast by ' + linkupFromUser.fullname;
+	}
+
+	let broadcastedByElement = newElement('p', '', broadcastedByText);
+	linkupElement.appendChild(broadcastedByElement);
+
 	// members
 	let membersContainer = newElement('ul', 'members');
 	linkupElement.appendChild(membersContainer);
@@ -440,6 +420,11 @@ async function prependLinkUp(linkup) {
 	linkupUsers.forEach((linkupUser) => {
 		let memberElement = newElement('li', '', linkupUser.fullname);
 		membersContainer.append(memberElement);
+
+		let userLinkup = getUserLinkup(linkupUserPivots, linkupID, linkupUser.id.toNumber());
+		if (!userLinkup.response.toNumber()) {
+			return;
+		}
 
 		let memberIconElement = newElement('i', ['fa-regular', 'fa-circle-check']);
 		memberElement.append(memberIconElement);
@@ -480,7 +465,7 @@ async function prependLinkUp(linkup) {
 	linkupElement.appendChild(joinLoadingContainer);
 
 	joinBtnElement.addEventListener('click', () => {
-		let linkupID = getLinkupID(linkup);
+		let linkupID = linkup.id.toNumber();
 
 		replaceButtonWithLoading(joinBtnContainer, joinLoadingContainer);
 
@@ -526,6 +511,12 @@ function appendToLinkupForm(contact) {
 	contactOption.innerHTML = contact.fullname;
 
 	linkupFormContacts.appendChild(contactOption);
+}
+
+function getUserLinkup(linkupUserPivots, linkupID, linkupUserID) {
+	return linkupUserPivots.find((pivot) => {
+		return pivot.linkup_id.toNumber() == linkupID && pivot.user_id.toNumber() == linkupUserID;
+	});
 }
 
 // profile

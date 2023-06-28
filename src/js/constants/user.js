@@ -1,9 +1,10 @@
-export const userAddress = '0xd68B8efC87FE3a736ad4916dF2651E19a79cf937';
+export const userAddress = '0xf23A4B54a98b71Bd2C5621ADbbCfA17a3d0ea628';
 
 export const userABI = [
 	{
 		anonymous: false,
 		inputs: [
+			{ indexed: true, internalType: 'address', name: 'userAddress', type: 'address' },
 			{
 				components: [
 					{ internalType: 'uint256', name: 'id', type: 'uint256' },
@@ -18,7 +19,6 @@ export const userABI = [
 				name: 'user',
 				type: 'tuple',
 			},
-			{ indexed: false, internalType: 'uint256', name: 'id', type: 'uint256' },
 		],
 		name: 'UserCreated',
 		type: 'event',
@@ -26,6 +26,7 @@ export const userABI = [
 	{
 		anonymous: false,
 		inputs: [
+			{ indexed: true, internalType: 'address', name: 'userAddress', type: 'address' },
 			{
 				components: [
 					{ internalType: 'uint256', name: 'id', type: 'uint256' },

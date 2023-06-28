@@ -1,6 +1,29 @@
-export const linkupAddress = '0x15c7578b0633FcC38017a416a66aff2D666bBA81';
+export const linkupAddress = '0x567A07381e67be5448f92bF3f9AAEA39E11bae11';
 
 export const linkupABI = [
+	{
+		anonymous: false,
+		inputs: [
+			{ indexed: false, internalType: 'address', name: 'userAddress', type: 'address' },
+			{
+				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
+					{ internalType: 'address', name: 'owner', type: 'address' },
+					{ internalType: 'string', name: 'status', type: 'string' },
+					{ internalType: 'string', name: 'description', type: 'string' },
+					{ internalType: 'string', name: 'location', type: 'string' },
+					{ internalType: 'uint256', name: 'startTime', type: 'uint256' },
+					{ internalType: 'uint256', name: 'endTime', type: 'uint256' },
+				],
+				indexed: false,
+				internalType: 'struct Linkup.LinkupStruct',
+				name: 'linkup',
+				type: 'tuple',
+			},
+		],
+		name: 'LinkupCreated',
+		type: 'event',
+	},
 	{
 		inputs: [],
 		name: 'count',

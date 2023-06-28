@@ -1,4 +1,4 @@
-export const userLinkupAddress = '0xe6792bDC3Db0D1B5b3C8577D400F2c03458BA45f';
+export const userLinkupAddress = '0xBC5a29fd72C6A9064d2A76471C2598244e8a6325';
 
 export const userLinkupABI = [
 	{
@@ -22,11 +22,11 @@ export const userLinkupABI = [
 				],
 				indexed: false,
 				internalType: 'struct Linkup.LinkupStruct',
-				name: 'linkupID',
+				name: 'linkup',
 				type: 'tuple',
 			},
 		],
-		name: 'NewUserLinkup',
+		name: 'UserLinkupCreated',
 		type: 'event',
 	},
 	{
@@ -85,6 +85,26 @@ export const userLinkupABI = [
 	{
 		inputs: [],
 		name: 'getAll',
+		outputs: [
+			{
+				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
+					{ internalType: 'uint256', name: 'linkup_id', type: 'uint256' },
+					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
+					{ internalType: 'uint256', name: 'response', type: 'uint256' },
+					{ internalType: 'uint256', name: 'from_user_id', type: 'uint256' },
+				],
+				internalType: 'struct UserLinkup.UserLinkupsPivot[]',
+				name: '',
+				type: 'tuple[]',
+			},
+		],
+		stateMutability: 'view',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'uint256', name: '_linkup_id', type: 'uint256' }],
+		name: 'getLinkupUserPivots',
 		outputs: [
 			{
 				components: [
