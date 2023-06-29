@@ -365,6 +365,10 @@ async function createLinkup(event) {
 	let endTime = document.getElementById('endTime').value;
 	let startTimeUnix = Date.parse(startDate + ' ' + startTime + ':00') / 1000;
 	let endTimeUnix = Date.parse(startDate + ' ' + endTime + ':00') / 1000;
+	let contactIDs = [];
+	linkupForm.querySelectorAll('#contacts option:checked').forEach((contactOption) => {
+		contactIDs.push(parseInt(contactOption.value));
+	});
 
 	replaceButtonWithLoading(linkupFormBtn, linkupFormLoadingContainer);
 	linkupFormLoadingInterval = setInterval(() => bounceLoading(linkupFormLoadingContainer), 300);
@@ -376,7 +380,7 @@ async function createLinkup(event) {
 		startTimeUnix,
 		endTimeUnix,
 		userID,
-		document.getElementById('contacts').value
+		contactIDs
 	);
 }
 
@@ -581,6 +585,10 @@ function formatMoment(linkup) {
 }
 
 function appendToLinkupForm(contact) {
+	if (contact.fullname == '') {
+		return;
+	}
+
 	let contactOption = newElement('option', '', contact.fullname);
 	contactOption.value = contact.id;
 	contactOption.innerHTML = contact.fullname;
