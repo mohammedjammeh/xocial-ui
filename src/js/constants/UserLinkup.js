@@ -1,4 +1,4 @@
-export const userLinkupAddress = '0xBC5a29fd72C6A9064d2A76471C2598244e8a6325';
+export const userLinkupAddress = '0xaD6D9f449b2ae52b7186006F4F1ad9465ba146A8';
 
 export const userLinkupABI = [
 	{
@@ -27,6 +27,29 @@ export const userLinkupABI = [
 			},
 		],
 		name: 'UserLinkupCreated',
+		type: 'event',
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{ indexed: true, internalType: 'address', name: 'userAddress', type: 'address' },
+			{
+				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
+					{ internalType: 'address', name: 'owner', type: 'address' },
+					{ internalType: 'string', name: 'status', type: 'string' },
+					{ internalType: 'string', name: 'description', type: 'string' },
+					{ internalType: 'string', name: 'location', type: 'string' },
+					{ internalType: 'uint256', name: 'startTime', type: 'uint256' },
+					{ internalType: 'uint256', name: 'endTime', type: 'uint256' },
+				],
+				indexed: false,
+				internalType: 'struct Linkup.LinkupStruct',
+				name: 'linkup',
+				type: 'tuple',
+			},
+		],
+		name: 'UserLinkupJoined',
 		type: 'event',
 	},
 	{
@@ -71,8 +94,8 @@ export const userLinkupABI = [
 					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'uint256', name: 'linkup_id', type: 'uint256' },
 					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'response', type: 'uint256' },
 					{ internalType: 'uint256', name: 'from_user_id', type: 'uint256' },
+					{ internalType: 'bool', name: 'response', type: 'bool' },
 				],
 				internalType: 'struct UserLinkup.UserLinkupsPivot',
 				name: '',
@@ -91,8 +114,8 @@ export const userLinkupABI = [
 					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'uint256', name: 'linkup_id', type: 'uint256' },
 					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'response', type: 'uint256' },
 					{ internalType: 'uint256', name: 'from_user_id', type: 'uint256' },
+					{ internalType: 'bool', name: 'response', type: 'bool' },
 				],
 				internalType: 'struct UserLinkup.UserLinkupsPivot[]',
 				name: '',
@@ -111,8 +134,8 @@ export const userLinkupABI = [
 					{ internalType: 'uint256', name: 'id', type: 'uint256' },
 					{ internalType: 'uint256', name: 'linkup_id', type: 'uint256' },
 					{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
-					{ internalType: 'uint256', name: 'response', type: 'uint256' },
 					{ internalType: 'uint256', name: 'from_user_id', type: 'uint256' },
+					{ internalType: 'bool', name: 'response', type: 'bool' },
 				],
 				internalType: 'struct UserLinkup.UserLinkupsPivot[]',
 				name: '',
@@ -166,6 +189,13 @@ export const userLinkupABI = [
 		type: 'function',
 	},
 	{
+		inputs: [{ internalType: 'uint256', name: 'user_linkup_id', type: 'uint256' }],
+		name: 'join',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
 		inputs: [],
 		name: 'linkupContract',
 		outputs: [{ internalType: 'contract Linkup', name: '', type: 'address' }],
@@ -206,8 +236,8 @@ export const userLinkupABI = [
 			{ internalType: 'uint256', name: 'id', type: 'uint256' },
 			{ internalType: 'uint256', name: 'linkup_id', type: 'uint256' },
 			{ internalType: 'uint256', name: 'user_id', type: 'uint256' },
-			{ internalType: 'uint256', name: 'response', type: 'uint256' },
 			{ internalType: 'uint256', name: 'from_user_id', type: 'uint256' },
+			{ internalType: 'bool', name: 'response', type: 'bool' },
 		],
 		stateMutability: 'view',
 		type: 'function',

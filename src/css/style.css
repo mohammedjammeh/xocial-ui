@@ -145,7 +145,6 @@ button.regularBtn:hover {
 }
 
 #loadingContainer div.loading span {
-	background: #ccc;
 	background: #cb3434;
 	width: 10px;
 	height: 10px;
@@ -157,7 +156,6 @@ button.regularBtn:hover {
 }
 
 #loadingContainer div.loading span.large {
-	background: #a6a6a6;
 	background: #8e2525;
 	width: 14px;
 	height: 14px;
@@ -413,17 +411,43 @@ nav ul li a.attention span.dot {
 	background: #e6e6e6;
 }
 
-.linkup .joinBtn button {
+.linkup .joinBtn button,
+.linkup .leaveBtn button {
 	display: block;
 	width: 22%;
 	margin: 3.5% auto 0;
 }
 
-.linkup #loadingContainer {
-	/* margin-top: 10px; */
+.linkup .leaveBtn button {
+	background: #e6e6e6;
+	color: #262626;
+}
+
+.linkup .leaveBtn button:hover {
+	background: #d9d9d9;
+}
+
+.linkup .broadcastForm #loadingContainer {
+	padding: 11px 0;
+	float: right;
+	width: 25%;
+	margin-right: 40px;
+}
+
+.linkup .joinBtn #loadingContainer,
+.linkup .leaveBtn #loadingContainer {
 	padding: 13px 0 12.5px;
 	width: 11%;
-	/* background: green; */
+}
+
+.linkup .broadcastForm #loadingContainer div.loading span,
+.linkup .leaveBtn #loadingContainer div.loading span {
+	background: #ccc;
+}
+
+.linkup .broadcastForm #loadingContainer div.loading span.large,
+.linkup .leaveBtn #loadingContainer div.loading span.large {
+	background: #a6a6a6;
 }
 
 /* profile */

@@ -1,4 +1,4 @@
-export const linkupAddress = '0x567A07381e67be5448f92bF3f9AAEA39E11bae11';
+export const linkupAddress = '0x0739EdC1eB8b82A3959983A5Bf98eeEf13602B3A';
 
 export const linkupABI = [
 	{

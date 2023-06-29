@@ -47,6 +47,7 @@ let linkups;
 // html elements
 let allButtons = document.querySelectorAll('button');
 let allForms = document.querySelectorAll('form');
+// let allFormBtns = document.querySelectorAll('input[type="submit"]');
 let allDateFields = document.querySelectorAll('input[type="date"]');
 
 let navBtns = document.querySelectorAll('nav ul li a');
@@ -61,7 +62,9 @@ let linkupFormContacts = linkupForm.querySelector('#contacts');
 let linkupFormBtn = linkupForm.querySelector('input[type="submit"]');
 let linkupFormLoadingContainer = linkupForm.querySelector('#loadingContainer');
 let linkupFormLoadingInterval;
+let linkupBroadcastInterval = [];
 let linkupJoinInterval = [];
+let linkupLeaveInterval = [];
 
 let userContainer = document.querySelectorAll('.user')[0];
 let profileForm = document.getElementById('profileForm');
@@ -107,6 +110,22 @@ wssUserLinkupContract.on(
 		resetLinkUpForm();
 	}
 );
+
+wssUserLinkupContract.on(
+	wssUserLinkupContract.filters.UserLinkupJoined(clientAddress),
+	async (log, linkup) => {
+		linkupContainer.innerHTML = '';
+		buildPage(users);
+	}
+);
+
+// wssUserLinkupContract.on(
+// 	wssUserLinkupContract.filters.UserLinkupLeft(clientAddress),
+// 	async (log, linkup) => {
+// 		linkupContainer.innerHTML = '';
+// 		buildPage(users);
+// 	}
+// );
 
 // user
 wssUserContract.on(wssUserContract.filters.UserCreated(clientAddress), (log, user) => {
@@ -156,6 +175,7 @@ wssUserContactContract.on(
 allDateFields.forEach((field) => (field.value = getTodayDate()));
 allButtons.forEach((btn) => [btn.addEventListener('click', (event) => event.preventDefault())]);
 allForms.forEach((form) => [form.addEventListener('submit', (event) => event.preventDefault())]);
+// allFormBtns.forEach((formBtn) => [formBtn.addEventListener('click', (event) => event.preventDefault())]);
 
 if (isConnected()) {
 	users = await userContract.getAll();
@@ -422,7 +442,7 @@ async function prependLinkUp(linkup) {
 		membersContainer.append(memberElement);
 
 		let userLinkup = getUserLinkup(linkupUserPivots, linkupID, linkupUser.id.toNumber());
-		if (!userLinkup.response.toNumber()) {
+		if (!userLinkup.response) {
 			return;
 		}
 
@@ -438,7 +458,6 @@ async function prependLinkUp(linkup) {
 	let toElement = newElement('select');
 
 	let linkupUsersIDs = linkupUsers.map((linkupUser) => linkupUser.id.toNumber());
-
 	userContacts.forEach((userContact) => {
 		if (linkupUsersIDs.includes(userContact.id.toNumber())) {
 			return;
@@ -453,33 +472,83 @@ async function prependLinkUp(linkup) {
 	submitElement.value = 'Broadcast';
 	submitElement.type = 'submit';
 
+	let broadcastLoadingContainer = createLoadingContainter();
+
 	buttonsContainer.append(broadcastFormContainer);
 	broadcastFormContainer.append(broadcastFormElement);
 	broadcastFormElement.append(toElement);
 	broadcastFormElement.append(submitElement);
+	broadcastFormContainer.append(broadcastLoadingContainer);
 	linkupElement.appendChild(buttonsContainer);
 
-	// buttons (join)
-	let joinBtnContainer = newElement('div', ['joinBtn']);
+	submitElement.addEventListener('click', async (event) => {
+		replaceButtonWithLoading(submitElement, broadcastLoadingContainer);
+
+		linkupBroadcastInterval[linkupID] = {
+			interval: setInterval(() => bounceLoading(broadcastLoadingContainer), 300),
+			element: linkupElement,
+		};
+
+		await userLinkupContract.create(toElement.value, linkupID, userID);
+	});
+
+	// buttons (join/leave)
+	let userLinkup = getUserLinkup(linkupUserPivots, linkupID, userID);
+
+	if (userLinkup.response) {
+		appendLeaveBtn(linkupElement, linkupID, userLinkup);
+	} else {
+		appendJoinBtn(linkupElement, linkupID, userLinkup);
+	}
+}
+
+function appendLeaveBtn(linkupElement, linkupID, userLinkup) {
+	let leaveBlock = newElement('div', ['leaveBtn']);
+	let leaveBtnContainer = newElement('div');
+	let leaveBtnElement = newElement('button', 'hide', 'Leave');
+
+	let leaveLoadingContainer = createLoadingContainter();
+	leaveLoadingContainer.setAttribute('id', 'loadingContainer');
+
+	leaveBtnContainer.append(leaveBtnElement);
+	leaveBlock.append(leaveBtnContainer);
+	leaveBlock.appendChild(leaveLoadingContainer);
+	linkupElement.appendChild(leaveBlock);
+
+	leaveBtnElement.addEventListener('click', async () => {
+		replaceButtonWithLoading(leaveBtnContainer, leaveLoadingContainer);
+
+		linkupLeaveInterval[linkupID] = {
+			interval: setInterval(() => bounceLoading(leaveLoadingContainer), 300),
+			element: linkupElement,
+		};
+
+		await userLinkupContract.leave(userLinkup.id.toNumber());
+	});
+}
+
+function appendJoinBtn(linkupElement, linkupID, userLinkup) {
+	let joinBlock = newElement('div', ['joinBtn']);
+	let joinBtnContainer = newElement('div');
 	let joinBtnElement = newElement('button', [], 'Join');
 
 	let joinLoadingContainer = createLoadingContainter();
 	joinLoadingContainer.setAttribute('id', 'loadingContainer');
 
 	joinBtnContainer.append(joinBtnElement);
-	linkupElement.appendChild(joinBtnContainer);
-	linkupElement.appendChild(joinLoadingContainer);
+	joinBlock.append(joinBtnContainer);
+	joinBlock.appendChild(joinLoadingContainer);
+	linkupElement.appendChild(joinBlock);
 
-	joinBtnElement.addEventListener('click', () => {
-		let linkupID = linkup.id.toNumber();
-
+	joinBtnElement.addEventListener('click', async () => {
 		replaceButtonWithLoading(joinBtnContainer, joinLoadingContainer);
 
 		linkupJoinInterval[linkupID] = {
 			interval: setInterval(() => bounceLoading(joinLoadingContainer), 300),
 			element: linkupElement,
 		};
-		// await userContactContract.create(userID, linkupID);
+
+		await userLinkupContract.join(userLinkup.id.toNumber());
 	});
 }
 
@@ -712,7 +781,7 @@ function newContactElements(contact, type) {
 	};
 }
 
-function createLoadingContainter() {
+function createLoadingContainter(regular) {
 	let nloadingContainer = newElement('div', 'hide');
 	nloadingContainer.setAttribute('id', 'loadingContainer');
 
