@@ -135,16 +135,16 @@ button.regularBtn:hover {
 	display: none;
 }
 
-#loadingContainer {
+.loadingContainer {
 	width: 100%;
 	margin: 0 auto;
 }
 
-#loadingContainer div.loading div {
+.loadingContainer div.loading div {
 	overflow: hidden;
 }
 
-#loadingContainer div.loading span {
+.loadingContainer div.loading span {
 	background: #cb3434;
 	width: 10px;
 	height: 10px;
@@ -155,11 +155,24 @@ button.regularBtn:hover {
 	transition: all 0.2s;
 }
 
-#loadingContainer div.loading span.large {
+.loadingContainer div.loading span.large {
 	background: #8e2525;
 	width: 14px;
 	height: 14px;
 	margin: 0 3px;
+}
+
+/* add class for this */
+#profileForm .loadingContainer div.loading span,
+.linkup .broadcastForm .loadingContainer div.loading span,
+.linkup .leaveBtn .loadingContainer div.loading span {
+	background: #ccc;
+}
+
+#profileForm .loadingContainer div.loading span.large,
+.linkup .broadcastForm .loadingContainer div.loading span.large,
+.linkup .leaveBtn .loadingContainer div.loading span.large {
+	background: #a6a6a6;
 }
 
 /*******************
@@ -218,7 +231,7 @@ button.regularBtn:hover {
 	width: 37%;
 }
 
-#linkupForm div #loadingContainer {
+#linkupForm div .loadingContainer {
 	padding: 12px 0 12px;
 }
 
@@ -320,7 +333,7 @@ nav ul li a.attention span.dot {
 	padding: 4px 0 7px;
 }
 
-.userSuggestions #loadingContainer {
+.userSuggestions .loadingContainer {
 	margin-top: 10px;
 	padding: 10px 0 10px;
 	width: 18%;
@@ -427,27 +440,17 @@ nav ul li a.attention span.dot {
 	background: #d9d9d9;
 }
 
-.linkup .broadcastForm #loadingContainer {
+.linkup .broadcastForm .loadingContainer {
 	padding: 11px 0;
 	float: right;
 	width: 25%;
 	margin-right: 40px;
 }
 
-.linkup .joinBtn #loadingContainer,
-.linkup .leaveBtn #loadingContainer {
+.linkup .joinBtn .loadingContainer,
+.linkup .leaveBtn .loadingContainer {
 	padding: 13px 0 12.5px;
 	width: 11%;
-}
-
-.linkup .broadcastForm #loadingContainer div.loading span,
-.linkup .leaveBtn #loadingContainer div.loading span {
-	background: #ccc;
-}
-
-.linkup .broadcastForm #loadingContainer div.loading span.large,
-.linkup .leaveBtn #loadingContainer div.loading span.large {
-	background: #a6a6a6;
 }
 
 /* profile */
@@ -496,7 +499,7 @@ nav ul li a.attention span.dot {
 	padding: 6px 5px 8px;
 }
 
-#profileForm #loadingContainer {
+#profileForm .loadingContainer {
 	padding: 10px 0 10px;
 }
 
@@ -548,7 +551,7 @@ nav ul li a.attention span.dot {
 	float: right;
 }
 
-.contacts .list #loadingContainer {
+.contacts .list .loadingContainer {
 	width: 12%;
 	float: right;
 	padding: 6.5px 0 0.5px;

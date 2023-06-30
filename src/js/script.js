@@ -60,7 +60,7 @@ let linkupContainer = document.querySelectorAll('.linkups')[0];
 let linkupForm = document.getElementById('linkupForm');
 let linkupFormContacts = linkupForm.querySelector('#contacts');
 let linkupFormBtn = linkupForm.querySelector('input[type="submit"]');
-let linkupFormLoadingContainer = linkupForm.querySelector('#loadingContainer');
+let linkupFormLoadingContainer = linkupForm.querySelector('.loadingContainer');
 let linkupFormLoadingInterval;
 let linkupBroadcastInterval = [];
 let linkupJoinInterval = [];
@@ -72,7 +72,7 @@ let profileFormSaveBtn = profileForm.querySelector('#saveBtn');
 let profileFormEditBtn = profileForm.querySelector('#editBtn');
 let profileFormUpdateBtn = profileForm.querySelector('#updateBtn');
 let profileFormCancelBtn = profileForm.querySelector('#cancelBtn');
-let profileFormLoadingContainer = profileForm.querySelector('#loadingContainer');
+let profileFormLoadingContainer = profileForm.querySelector('.loadingContainer');
 let profileFormLoadingInterval;
 
 let contactList = document.querySelectorAll('.contacts .list')[0];
@@ -214,7 +214,7 @@ async function connectListenerForButtons() {
 	// linkup
 	linkupForm.addEventListener('submit', () => connect());
 
-	linkups.forEach((linkup) => prependLinkUp(linkup));
+	// linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	let broadcastForms = document.querySelectorAll('.broadcastForm form');
 	broadcastForms.forEach((form) => {
@@ -323,6 +323,53 @@ function goToView(activeContainer, activeBtn) {
 	activeBtn.classList.add('active');
 }
 
+function newContactElements(contact, type) {
+	let contactItem = newElement('div');
+
+	let nameElement = newElement('p', 'name', contact.fullname);
+	let addressElement = newElement('p', 'address', contact.owner);
+
+	let btnContainer = newElement('div', 'removeBtnContainer');
+	let btnElement = newElement('button');
+	let btnIconClass = type == 'search' ? 'plus' : 'minus';
+	let btnIconElement = newElement('i', ['fa-solid', 'fa-circle-' + btnIconClass]);
+
+	let loadingContainer = createLoadingContainter();
+
+	btnElement.append(btnIconElement);
+	btnContainer.append(btnElement);
+
+	contactItem.append(nameElement);
+	contactItem.append(addressElement);
+	contactItem.append(btnContainer);
+	contactItem.append(loadingContainer);
+
+	return {
+		btn: btnContainer,
+		loading: loadingContainer,
+		element: contactItem,
+	};
+}
+
+function createLoadingContainter() {
+	let nloadingContainer = newElement('div', 'loadingContainer');
+
+	let nLoadingElement = newElement('div', 'loading');
+
+	let nInnerLoadingElement = newElement('div');
+	let nFirstCircle = newElement('span', 'large');
+	let nMiddleCircle = newElement('span');
+	let nLastCircle = newElement('span', 'third');
+
+	nloadingContainer.append(nLoadingElement);
+	nLoadingElement.append(nInnerLoadingElement);
+	nInnerLoadingElement.append(nFirstCircle);
+	nInnerLoadingElement.append(nMiddleCircle);
+	nInnerLoadingElement.append(nLastCircle);
+
+	return nloadingContainer;
+}
+
 function bounceLoading(loadingContainer) {
 	let largeLoadingElement = loadingContainer.querySelectorAll('.loading span.large')[0];
 
@@ -373,15 +420,15 @@ async function createLinkup(event) {
 	replaceButtonWithLoading(linkupFormBtn, linkupFormLoadingContainer);
 	linkupFormLoadingInterval = setInterval(() => bounceLoading(linkupFormLoadingContainer), 300);
 
-	await userLinkupContract.createLinkupPlusUserLinkup(
-		document.getElementById('type').value,
-		document.getElementById('description').value,
-		document.getElementById('location').value,
-		startTimeUnix,
-		endTimeUnix,
-		userID,
-		contactIDs
-	);
+	// await userLinkupContract.createLinkupPlusUserLinkup(
+	// 	document.getElementById('type').value,
+	// 	document.getElementById('description').value,
+	// 	document.getElementById('location').value,
+	// 	startTimeUnix,
+	// 	endTimeUnix,
+	// 	userID,
+	// 	contactIDs
+	// );
 }
 
 function resetLinkUpForm() {
@@ -493,7 +540,7 @@ async function prependLinkUp(linkup) {
 			element: linkupElement,
 		};
 
-		await userLinkupContract.create(toElement.value, linkupID, userID);
+		// await userLinkupContract.create(toElement.value, linkupID, userID);
 	});
 
 	// buttons (join/leave)
@@ -512,7 +559,6 @@ function appendLeaveBtn(linkupElement, linkupID, userLinkup) {
 	let leaveBtnElement = newElement('button', 'hide', 'Leave');
 
 	let leaveLoadingContainer = createLoadingContainter();
-	leaveLoadingContainer.setAttribute('id', 'loadingContainer');
 
 	leaveBtnContainer.append(leaveBtnElement);
 	leaveBlock.append(leaveBtnContainer);
@@ -527,7 +573,7 @@ function appendLeaveBtn(linkupElement, linkupID, userLinkup) {
 			element: linkupElement,
 		};
 
-		await userLinkupContract.leave(userLinkup.id.toNumber());
+		// await userLinkupContract.leave(userLinkup.id.toNumber());
 	});
 }
 
@@ -537,7 +583,6 @@ function appendJoinBtn(linkupElement, linkupID, userLinkup) {
 	let joinBtnElement = newElement('button', [], 'Join');
 
 	let joinLoadingContainer = createLoadingContainter();
-	joinLoadingContainer.setAttribute('id', 'loadingContainer');
 
 	joinBtnContainer.append(joinBtnElement);
 	joinBlock.append(joinBtnContainer);
@@ -552,7 +597,7 @@ function appendJoinBtn(linkupElement, linkupID, userLinkup) {
 			element: linkupElement,
 		};
 
-		await userLinkupContract.join(userLinkup.id.toNumber());
+		// await userLinkupContract.join(userLinkup.id.toNumber());
 	});
 }
 
@@ -644,13 +689,13 @@ function enableUserForm() {
 }
 
 async function updateUser(userID) {
-	await userContract.update(
-		userID,
-		document.getElementById('fullname').value,
-		getSelected('musicTaste'),
-		getSelected('foodTaste'),
-		getSelected('sportsTaste')
-	);
+	// await userContract.update(
+	// 	userID,
+	// 	document.getElementById('fullname').value,
+	// 	getSelected('musicTaste'),
+	// 	getSelected('foodTaste'),
+	// 	getSelected('sportsTaste')
+	// );
 
 	profileFormCancelBtn.classList.add('hide');
 	replaceButtonWithLoading(profileFormUpdateBtn, profileFormLoadingContainer);
@@ -734,7 +779,7 @@ function buildContactList(contact) {
 			element: element,
 		};
 
-		await userContactContract.destroy(userID, contactID);
+		// await userContactContract.destroy(userID, contactID);
 	});
 }
 
@@ -756,58 +801,10 @@ function buildSearchList(contact) {
 			element: element,
 		};
 
-		await userContactContract.create(userID, contactID);
+		// await userContactContract.create(userID, contactID);
 	});
 }
 
-function newContactElements(contact, type) {
-	let contactItem = newElement('div');
-
-	let nameElement = newElement('p', 'name', contact.fullname);
-	let addressElement = newElement('p', 'address', contact.owner);
-
-	let btnContainer = newElement('div', 'removeBtnContainer');
-	let btnElement = newElement('button');
-	let btnIconClass = type == 'search' ? 'plus' : 'minus';
-	let btnIconElement = newElement('i', ['fa-solid', 'fa-circle-' + btnIconClass]);
-
-	let loadingContainer = createLoadingContainter();
-	loadingContainer.setAttribute('id', 'loadingContainer');
-
-	btnElement.append(btnIconElement);
-	btnContainer.append(btnElement);
-
-	contactItem.append(nameElement);
-	contactItem.append(addressElement);
-	contactItem.append(btnContainer);
-	contactItem.append(loadingContainer);
-
-	return {
-		btn: btnContainer,
-		loading: loadingContainer,
-		element: contactItem,
-	};
-}
-
-function createLoadingContainter(regular) {
-	let nloadingContainer = newElement('div', 'hide');
-	nloadingContainer.setAttribute('id', 'loadingContainer');
-
-	let nLoadingElement = newElement('div', 'loading');
-
-	let nInnerLoadingElement = newElement('div');
-	let nFirstCircle = newElement('span', 'large');
-	let nMiddleCircle = newElement('span');
-	let nLastCircle = newElement('span', 'third');
-
-	nloadingContainer.append(nLoadingElement);
-	nLoadingElement.append(nInnerLoadingElement);
-	nInnerLoadingElement.append(nFirstCircle);
-	nInnerLoadingElement.append(nMiddleCircle);
-	nInnerLoadingElement.append(nLastCircle);
-
-	return nloadingContainer;
-}
 // user suggestion
 function buildUserSuggestion(suggestion) {
 	let suggestionItem = newElement('div');
@@ -837,6 +834,6 @@ function buildUserSuggestion(suggestion) {
 			element: suggestionItem,
 		};
 
-		await userContactContract.create(userID, contactID);
+		// await userContactContract.create(userID, contactID);
 	});
 }
