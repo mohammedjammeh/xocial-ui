@@ -213,8 +213,7 @@ async function connectListenerForButtons() {
 
 	// linkup
 	linkupForm.addEventListener('submit', () => connect());
-
-	// linkups.forEach((linkup) => prependLinkUp(linkup));
+	linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	let broadcastForms = document.querySelectorAll('.broadcastForm form');
 	broadcastForms.forEach((form) => {
@@ -450,7 +449,7 @@ async function prependLinkUp(linkup) {
 	linkupContainer.prepend(linkupElement);
 
 	// status
-	let statusElement = newElement('p', ['type'], '🎉 🎉 ' + linkup.status);
+	let statusElement = newElement('p', ['type'], '🎉 ' + linkup.status);
 	linkupElement.appendChild(statusElement);
 
 	// location
@@ -475,13 +474,15 @@ async function prependLinkUp(linkup) {
 	let broadcastedByText;
 
 	if (linkupFromUserID == userID) {
-		broadcastedByText = 'Belongs to you';
+		broadcastedByText = 'Me';
 	} else {
 		let linkupFromUser = await userContract.get(linkupFromUserID);
-		broadcastedByText = 'Broadcast by ' + linkupFromUser.fullname;
+		broadcastedByText = linkupFromUser.fullname;
 	}
 
-	let broadcastedByElement = newElement('p', '', broadcastedByText);
+	let broadcastedByElement = newElement('p', '', ' ' + broadcastedByText);
+	let broadcastByIconElement = newElement('i', ['fa-solid', 'fa-bullhorn']);
+	broadcastedByElement.prepend(broadcastByIconElement);
 	linkupElement.appendChild(broadcastedByElement);
 
 	// members
