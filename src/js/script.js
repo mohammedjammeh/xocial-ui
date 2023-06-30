@@ -352,7 +352,7 @@ function newContactElements(contact, type) {
 }
 
 function createLoadingContainter() {
-	let nloadingContainer = newElement('div', 'loadingContainer');
+	let nloadingContainer = newElement('div', ['hide', 'loadingContainer']);
 
 	let nLoadingElement = newElement('div', 'loading');
 
