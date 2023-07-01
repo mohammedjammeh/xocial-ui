@@ -25,6 +25,7 @@ const unconnectedLinkupContract = new ethers.Contract(linkupAddress, linkupABI, 
 
 const userContract = new ethers.Contract(userAddress, userABI, windowSigner);
 const wssUserContract = new ethers.Contract(userAddress, userABI, wssSigner);
+const unconnectedUserContract = new ethers.Contract(userAddress, userABI, windowProvider);
 
 const userContactContract = new ethers.Contract(userContactAddress, userContactABI, windowSigner);
 const wssUserContactContract = new ethers.Contract(userContactAddress, userContactABI, wssSigner);
@@ -119,13 +120,13 @@ wssUserLinkupContract.on(
 	}
 );
 
-// wssUserLinkupContract.on(
-// 	wssUserLinkupContract.filters.UserLinkupLeft(clientAddress),
-// 	async (log, linkup) => {
-// 		linkupContainer.innerHTML = '';
-// 		buildPage(users);
-// 	}
-// );
+wssUserLinkupContract.on(
+	wssUserLinkupContract.filters.UserLinkupLeft(clientAddress),
+	async (log, linkup) => {
+		linkupContainer.innerHTML = '';
+		buildPage(users);
+	}
+);
 
 // user
 wssUserContract.on(wssUserContract.filters.UserCreated(clientAddress), (log, user) => {
@@ -199,8 +200,9 @@ async function connect() {
 }
 
 async function connectListenerForButtons() {
-	//data
-	linkups = await unconnectedLinkupContract.getAll();
+	//data (build page with this data..)
+	linkups = await unconnectedLinkupContract.getUnconnectedAll();
+	users = await unconnectedUserContract.getUnconnectedAll();
 
 	// nav
 	navBtns.forEach((btn) => btn.addEventListener('click', connect));
@@ -213,7 +215,7 @@ async function connectListenerForButtons() {
 
 	// linkup
 	linkupForm.addEventListener('submit', () => connect());
-	linkups.forEach((linkup) => prependLinkUp(linkup));
+	// linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	let broadcastForms = document.querySelectorAll('.broadcastForm form');
 	broadcastForms.forEach((form) => {
@@ -225,19 +227,12 @@ async function connectListenerForButtons() {
 }
 
 async function buildPage(users) {
-	// data
 	userID = getUserID(clientAddress);
 	user = users.find((u) => u.owner == clientAddress);
-	linkups = await userLinkupContract.getUserLinkups(userID);
-	contacts = await userContactContract.getContacts(userID);
 
 	// nav
 	homeBtn.addEventListener('click', () => goToView(linkupContainer, homeBtn));
 	profileBtn.addEventListener('click', () => goToView(userContainer, profileBtn));
-
-	// linkup
-	linkupForm.addEventListener('submit', (event) => createLinkup(event));
-	linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	// profile
 	if (!user) {
@@ -254,6 +249,13 @@ async function buildPage(users) {
 		disableUserFormExcept();
 	});
 	profileFormCancelBtn.addEventListener('click', () => disableUserFormExcept(profileFormEditBtn));
+
+	// linkup
+	linkups = await userLinkupContract.getUserLinkups(userID);
+	contacts = await userContactContract.getContacts(userID);
+
+	linkupForm.addEventListener('submit', (event) => createLinkup(event));
+	linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	// contact
 	contacts.forEach((contact) => {
