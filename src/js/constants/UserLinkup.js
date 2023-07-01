@@ -1,4 +1,4 @@
-export const userLinkupAddress = '0xaD6D9f449b2ae52b7186006F4F1ad9465ba146A8';
+export const userLinkupAddress = '0x50a2D881167bA9bB2d13D3e5929176459113407f';
 
 export const userLinkupABI = [
 	{
@@ -53,6 +53,29 @@ export const userLinkupABI = [
 		type: 'event',
 	},
 	{
+		anonymous: false,
+		inputs: [
+			{ indexed: true, internalType: 'address', name: 'userAddress', type: 'address' },
+			{
+				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
+					{ internalType: 'address', name: 'owner', type: 'address' },
+					{ internalType: 'string', name: 'status', type: 'string' },
+					{ internalType: 'string', name: 'description', type: 'string' },
+					{ internalType: 'string', name: 'location', type: 'string' },
+					{ internalType: 'uint256', name: 'startTime', type: 'uint256' },
+					{ internalType: 'uint256', name: 'endTime', type: 'uint256' },
+				],
+				indexed: false,
+				internalType: 'struct Linkup.LinkupStruct',
+				name: 'linkup',
+				type: 'tuple',
+			},
+		],
+		name: 'UserLinkupLeft',
+		type: 'event',
+	},
+	{
 		inputs: [],
 		name: 'count',
 		outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
@@ -78,7 +101,7 @@ export const userLinkupABI = [
 			{ internalType: 'uint256', name: '_startTime', type: 'uint256' },
 			{ internalType: 'uint256', name: '_endTime', type: 'uint256' },
 			{ internalType: 'uint256', name: '_creator_id', type: 'uint256' },
-			{ internalType: 'uint256', name: '_to_user_id', type: 'uint256' },
+			{ internalType: 'uint256[]', name: '_to_user_ids', type: 'uint256[]' },
 		],
 		name: 'createLinkupPlusUserLinkup',
 		outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
@@ -191,6 +214,13 @@ export const userLinkupABI = [
 	{
 		inputs: [{ internalType: 'uint256', name: 'user_linkup_id', type: 'uint256' }],
 		name: 'join',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'uint256', name: 'user_linkup_id', type: 'uint256' }],
+		name: 'leave',
 		outputs: [],
 		stateMutability: 'nonpayable',
 		type: 'function',

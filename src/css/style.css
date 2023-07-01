@@ -163,13 +163,13 @@ button.regularBtn:hover {
 }
 
 /* add class for this */
-#profileForm .loadingContainer div.loading span,
+/* #profileForm .loadingContainer div.loading span, */
 .linkup .broadcastForm .loadingContainer div.loading span,
 .linkup .leaveBtn .loadingContainer div.loading span {
 	background: #ccc;
 }
 
-#profileForm .loadingContainer div.loading span.large,
+/* #profileForm .loadingContainer div.loading span.large, */
 .linkup .broadcastForm .loadingContainer div.loading span.large,
 .linkup .leaveBtn .loadingContainer div.loading span.large {
 	background: #a6a6a6;
@@ -352,6 +352,14 @@ nav ul li a.attention span.dot {
     Middle Column 
 *******************/
 /* linkup */
+.noLinkups {
+	background: white;
+	padding: 1% 5%;
+	text-align: center;
+	letter-spacing: 0.25px;
+	line-height: 2;
+}
+
 .linkups {
 	letter-spacing: 0.25px;
 }
@@ -492,7 +500,6 @@ nav ul li a.attention span.dot {
 	overflow: hidden;
 	margin: 2.5% 0;
 	margin: 0 0 5%;
-	/* margin: 2.5 0 2.5%; */
 }
 
 #profileForm .musicTaste .inputContainer,
@@ -531,7 +538,7 @@ nav ul li a.attention span.dot {
 	color: black;
 }
 
-.contacts .list div {
+.contacts .list > div {
 	overflow: hidden;
 	margin: 2.5% 0;
 }
@@ -563,7 +570,7 @@ nav ul li a.attention span.dot {
 .contacts .list .loadingContainer {
 	width: 12%;
 	float: right;
-	padding: 6.5px 0 0.5px;
+	padding: 10px 0 0.5px;
 }
 
 .contacts .list button {

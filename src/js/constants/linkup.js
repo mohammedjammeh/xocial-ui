@@ -1,4 +1,4 @@
-export const linkupAddress = '0x0739EdC1eB8b82A3959983A5Bf98eeEf13602B3A';
+export const linkupAddress = '0x07A4cbA0E1E9b054A3D8b154394091a0Bc940D07';
 
 export const linkupABI = [
 	{
@@ -69,6 +69,28 @@ export const linkupABI = [
 	{
 		inputs: [],
 		name: 'getAll',
+		outputs: [
+			{
+				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
+					{ internalType: 'address', name: 'owner', type: 'address' },
+					{ internalType: 'string', name: 'status', type: 'string' },
+					{ internalType: 'string', name: 'description', type: 'string' },
+					{ internalType: 'string', name: 'location', type: 'string' },
+					{ internalType: 'uint256', name: 'startTime', type: 'uint256' },
+					{ internalType: 'uint256', name: 'endTime', type: 'uint256' },
+				],
+				internalType: 'struct Linkup.LinkupStruct[]',
+				name: '',
+				type: 'tuple[]',
+			},
+		],
+		stateMutability: 'view',
+		type: 'function',
+	},
+	{
+		inputs: [],
+		name: 'getUnconnectedAll',
 		outputs: [
 			{
 				components: [

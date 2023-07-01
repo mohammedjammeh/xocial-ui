@@ -36,7 +36,6 @@ const wssUserLinkupContract = new ethers.Contract(userLinkupAddress, userLinkupA
 // account
 let accounts = await windowProvider.listAccounts();
 let clientAddress = accounts[0] ?? null;
-// let clientAddress = '9826';
 
 // data
 let users;
@@ -48,7 +47,6 @@ let linkups;
 // html elements
 let allButtons = document.querySelectorAll('button');
 let allForms = document.querySelectorAll('form');
-// let allFormBtns = document.querySelectorAll('input[type="submit"]');
 let allDateFields = document.querySelectorAll('input[type="date"]');
 
 let navBtns = document.querySelectorAll('nav ul li a');
@@ -57,6 +55,7 @@ let profileBtn = document.getElementById('profileBtn');
 let connectBtn = document.getElementById('connectBtn');
 let profileNavAttentionInterval;
 
+let noLinkupsContainer = document.querySelectorAll('.noLinkups')[0];
 let linkupContainer = document.querySelectorAll('.linkups')[0];
 let linkupForm = document.getElementById('linkupForm');
 let linkupFormContacts = linkupForm.querySelector('#contacts');
@@ -103,12 +102,8 @@ window.ethereum.on('accountsChanged', async function () {
 wssUserLinkupContract.on(
 	wssUserLinkupContract.filters.UserLinkupCreated(clientAddress),
 	async (log, linkup) => {
-		prependLinkUp(linkup);
-
-		replaceLoadingWithButton(linkupFormBtn, linkupFormLoadingContainer);
-		clearInterval(linkupFormLoadingInterval);
-
-		resetLinkUpForm();
+		linkupContainer.innerHTML = '';
+		buildPage(users);
 	}
 );
 
@@ -132,6 +127,9 @@ wssUserLinkupContract.on(
 wssUserContract.on(wssUserContract.filters.UserCreated(clientAddress), (log, user) => {
 	profileBtn.children[1].classList.remove('dot');
 	clearInterval(profileNavAttentionInterval);
+
+	profileFormLoadingContainer.classList.add('hide');
+	clearInterval(profileFormLoadingInterval);
 
 	users[user.id] = user;
 	users = users.filter((value) => Object.keys(value).length !== 0);
@@ -200,9 +198,10 @@ async function connect() {
 }
 
 async function connectListenerForButtons() {
-	//data (build page with this data..)
-	linkups = await unconnectedLinkupContract.getUnconnectedAll();
+	noLinkupsContainer.classList.remove('hide');
+
 	users = await unconnectedUserContract.getUnconnectedAll();
+	linkups = await unconnectedLinkupContract.getUnconnectedAll();
 
 	// nav
 	navBtns.forEach((btn) => btn.addEventListener('click', connect));
@@ -211,11 +210,14 @@ async function connectListenerForButtons() {
 	setInterval(() => swingAttentionCircle(connectBtn), 800);
 
 	// suggestions
-	userSuggestionsBtns.forEach((btn) => btn.addEventListener('click', connect));
+	users.forEach((suggestion) => buildUserSuggestion(suggestion));
+	document
+		.querySelectorAll('.userSuggestions button')
+		.forEach((btn) => btn.addEventListener('click', connect));
 
 	// linkup
 	linkupForm.addEventListener('submit', () => connect());
-	// linkups.forEach((linkup) => prependLinkUp(linkup));
+	linkups.forEach((linkup) => prependLinkUp(linkup));
 
 	let broadcastForms = document.querySelectorAll('.broadcastForm form');
 	broadcastForms.forEach((form) => {
@@ -254,6 +256,9 @@ async function buildPage(users) {
 	linkups = await userLinkupContract.getUserLinkups(userID);
 	contacts = await userContactContract.getContacts(userID);
 
+	if (linkups.length > 0) {
+		noLinkupsContainer.classList.remove('hide');
+	}
 	linkupForm.addEventListener('submit', (event) => createLinkup(event));
 	linkups.forEach((linkup) => prependLinkUp(linkup));
 
@@ -267,8 +272,7 @@ async function buildPage(users) {
 	// user suggestions
 	let contactIDs = getIDs(contacts);
 	let contactSuggestions = users.filter((suggestion, id) => {
-		// return !contactIDs.includes(id) && suggestion.owner !== clientAddress;
-		return !contactIDs.includes(id);
+		return !contactIDs.includes(id) && suggestion.owner !== clientAddress;
 	});
 	contactSuggestions.forEach((suggestion) => buildUserSuggestion(suggestion));
 }
@@ -421,15 +425,15 @@ async function createLinkup(event) {
 	replaceButtonWithLoading(linkupFormBtn, linkupFormLoadingContainer);
 	linkupFormLoadingInterval = setInterval(() => bounceLoading(linkupFormLoadingContainer), 300);
 
-	// await userLinkupContract.createLinkupPlusUserLinkup(
-	// 	document.getElementById('type').value,
-	// 	document.getElementById('description').value,
-	// 	document.getElementById('location').value,
-	// 	startTimeUnix,
-	// 	endTimeUnix,
-	// 	userID,
-	// 	contactIDs
-	// );
+	await userLinkupContract.createLinkupPlusUserLinkup(
+		document.getElementById('type').value,
+		document.getElementById('description').value,
+		document.getElementById('location').value,
+		startTimeUnix,
+		endTimeUnix,
+		userID,
+		contactIDs
+	);
 }
 
 function resetLinkUpForm() {
@@ -543,7 +547,7 @@ async function prependLinkUp(linkup) {
 			element: linkupElement,
 		};
 
-		// await userLinkupContract.create(toElement.value, linkupID, userID);
+		await userLinkupContract.create(toElement.value, linkupID, userID);
 	});
 
 	// buttons (join/leave)
@@ -576,7 +580,7 @@ function appendLeaveBtn(linkupElement, linkupID, userLinkup) {
 			element: linkupElement,
 		};
 
-		// await userLinkupContract.leave(userLinkup.id.toNumber());
+		await userLinkupContract.leave(userLinkup.id.toNumber());
 	});
 }
 
@@ -600,7 +604,7 @@ function appendJoinBtn(linkupElement, linkupID, userLinkup) {
 			element: linkupElement,
 		};
 
-		// await userLinkupContract.join(userLinkup.id.toNumber());
+		await userLinkupContract.join(userLinkup.id.toNumber());
 	});
 }
 
@@ -692,13 +696,13 @@ function enableUserForm() {
 }
 
 async function updateUser(userID) {
-	// await userContract.update(
-	// 	userID,
-	// 	document.getElementById('fullname').value,
-	// 	getSelected('musicTaste'),
-	// 	getSelected('foodTaste'),
-	// 	getSelected('sportsTaste')
-	// );
+	await userContract.update(
+		userID,
+		document.getElementById('fullname').value,
+		getSelected('musicTaste'),
+		getSelected('foodTaste'),
+		getSelected('sportsTaste')
+	);
 
 	profileFormCancelBtn.classList.add('hide');
 	replaceButtonWithLoading(profileFormUpdateBtn, profileFormLoadingContainer);
@@ -773,8 +777,7 @@ function buildContactList(contact) {
 	contactList.append(element);
 
 	btn.addEventListener('click', async () => {
-		let contactID = 1;
-		// let contactID = contact.id;
+		let contactID = contact.id;
 
 		replaceButtonWithLoading(btn, loadingContainer);
 		removeContactLoadings[contactID] = {
@@ -782,7 +785,7 @@ function buildContactList(contact) {
 			element: element,
 		};
 
-		// await userContactContract.destroy(userID, contactID);
+		await userContactContract.destroy(userID, contactID);
 	});
 }
 
@@ -795,8 +798,7 @@ function buildSearchList(contact) {
 	contactSearchList.append(element);
 
 	btn.addEventListener('click', async () => {
-		let contactID = 1;
-		// let contactID = contact.id;
+		let contactID = contact.id;
 
 		replaceButtonWithLoading(btn, loadingContainer);
 		addContactLoadings[contactID] = {
@@ -804,7 +806,7 @@ function buildSearchList(contact) {
 			element: element,
 		};
 
-		// await userContactContract.create(userID, contactID);
+		await userContactContract.create(userID, contactID);
 	});
 }
 
@@ -828,8 +830,7 @@ function buildUserSuggestion(suggestion) {
 	infoElement.append(addressElement);
 
 	btn.addEventListener('click', async () => {
-		let contactID = 2;
-		// let contactID = suggestion.id;
+		let contactID = suggestion.id;
 
 		replaceButtonWithLoading(btn, loadingContainer);
 		addContactLoadings[contactID] = {
@@ -837,6 +838,6 @@ function buildUserSuggestion(suggestion) {
 			element: suggestionItem,
 		};
 
-		// await userContactContract.create(userID, contactID);
+		await userContactContract.create(userID, contactID);
 	});
 }

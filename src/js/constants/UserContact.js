@@ -1,4 +1,4 @@
-export const userContactAddress = '0x07C8F6aE1460C69A3C08b48A1770D7806aC27c08';
+export const userContactAddress = '0xDc369Cc92B7FCC0f196eCA354b8E6bB0e8902F93';
 
 export const userContactABI = [
 	{

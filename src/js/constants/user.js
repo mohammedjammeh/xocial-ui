@@ -1,4 +1,4 @@
-export const userAddress = '0xf23A4B54a98b71Bd2C5621ADbbCfA17a3d0ea628';
+export const userAddress = '0xD461Af016C72D7F4a39cD7ac78B6982A9ECBc56F';
 
 export const userABI = [
 	{
@@ -88,6 +88,27 @@ export const userABI = [
 	{
 		inputs: [],
 		name: 'getAll',
+		outputs: [
+			{
+				components: [
+					{ internalType: 'uint256', name: 'id', type: 'uint256' },
+					{ internalType: 'address', name: 'owner', type: 'address' },
+					{ internalType: 'string', name: 'fullname', type: 'string' },
+					{ internalType: 'string[]', name: 'musicTaste', type: 'string[]' },
+					{ internalType: 'string[]', name: 'foodTaste', type: 'string[]' },
+					{ internalType: 'string[]', name: 'sportsTaste', type: 'string[]' },
+				],
+				internalType: 'struct User.UserStruct[]',
+				name: '',
+				type: 'tuple[]',
+			},
+		],
+		stateMutability: 'view',
+		type: 'function',
+	},
+	{
+		inputs: [],
+		name: 'getUnconnectedAll',
 		outputs: [
 			{
 				components: [
