@@ -352,16 +352,16 @@ nav ul li a.attention span.dot {
     Middle Column 
 *******************/
 /* linkup */
-.noLinkups {
+.linkups {
+	letter-spacing: 0.25px;
+}
+
+.linkups .emptyMessage {
 	background: white;
 	padding: 1% 5%;
 	text-align: center;
 	letter-spacing: 0.25px;
 	line-height: 2;
-}
-
-.linkups {
-	letter-spacing: 0.25px;
 }
 
 .linkup {

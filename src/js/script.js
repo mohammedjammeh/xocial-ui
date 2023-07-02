@@ -55,8 +55,8 @@ let profileBtn = document.getElementById('profileBtn');
 let connectBtn = document.getElementById('connectBtn');
 let profileNavAttentionInterval;
 
-let noLinkupsContainer = document.querySelectorAll('.noLinkups')[0];
 let linkupContainer = document.querySelectorAll('.linkups')[0];
+let linkupsEmptyMessage = document.querySelectorAll('.emptyMessage')[0];
 let linkupForm = document.getElementById('linkupForm');
 let linkupFormContacts = linkupForm.querySelector('#contacts');
 let linkupFormBtn = linkupForm.querySelector('input[type="submit"]');
@@ -252,7 +252,7 @@ async function buildPage(users) {
 
 	// profile
 	if (!user) {
-		noLinkupsContainer.classList.remove('hide');
+		linkupsEmptyMessage.classList.remove('hide');
 
 		profileNavAttentionInterval = setInterval(() => swingAttentionCircle(profileBtn), 800);
 		profileFormSaveBtn.addEventListener('click', () => createUser());
@@ -277,9 +277,9 @@ async function buildPage(users) {
 	contacts = await userContactContract.getContacts(userID);
 
 	if (linkups.length > 0) {
-		noLinkupsContainer.classList.add('hide');
+		linkupsEmptyMessage.classList.add('hide');
 	} else {
-		noLinkupsContainer.classList.remove('hide');
+		linkupsEmptyMessage.classList.remove('hide');
 	}
 
 	linkupForm.addEventListener('submit', (event) => createLinkup(event));
@@ -460,12 +460,18 @@ async function createLinkup(event) {
 }
 
 function resetLinkUpForm() {
-	document.getElementById('type').value = 'chill';
+	document.getElementById('type').value = 'Chilling';
 	document.getElementById('description').value = '';
 	document.getElementById('location').value = '';
 	document.getElementById('startDate').value = getTodayDate();
 	document.getElementById('startTime').value = '00:00';
 	document.getElementById('endTime').value = '23:59';
+
+	document.getElementById('contacts option').forEach((option) => {
+		if (!option.disabled && option.value !== '') {
+			option.remove();
+		}
+	});
 }
 
 async function prependLinkUp(linkup) {
@@ -584,8 +590,6 @@ async function prependLinkUp(linkup) {
 }
 
 async function prependUnconnectedLinkUp(linkup) {
-	let linkupID = linkup.id.toNumber();
-
 	let linkupElement = newElement('div', ['linkup', 'columnContainer']);
 	linkupContainer.prepend(linkupElement);
 
