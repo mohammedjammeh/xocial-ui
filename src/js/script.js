@@ -102,7 +102,14 @@ window.ethereum.on('accountsChanged', async function () {
 wssUserLinkupContract.on(
 	wssUserLinkupContract.filters.UserLinkupCreated(clientAddress),
 	async (log, linkup) => {
+		replaceLoadingWithButton(linkupFormBtn, linkupFormLoadingContainer);
+		clearInterval(linkupFormLoadingInterval);
+
+		resetLinkUpForm();
+
 		linkupContainer.innerHTML = '';
+		userSuggestionsContainer.innerHTML = '';
+
 		buildPage(users);
 	}
 );
@@ -111,6 +118,8 @@ wssUserLinkupContract.on(
 	wssUserLinkupContract.filters.UserLinkupJoined(clientAddress),
 	async (log, linkup) => {
 		linkupContainer.innerHTML = '';
+		userSuggestionsContainer.innerHTML = '';
+
 		buildPage(users);
 	}
 );
@@ -119,6 +128,8 @@ wssUserLinkupContract.on(
 	wssUserLinkupContract.filters.UserLinkupLeft(clientAddress),
 	async (log, linkup) => {
 		linkupContainer.innerHTML = '';
+		userSuggestionsContainer.innerHTML = '';
+
 		buildPage(users);
 	}
 );
@@ -134,6 +145,8 @@ wssUserContract.on(wssUserContract.filters.UserCreated(clientAddress), (log, use
 	users[user.id] = user;
 	users = users.filter((value) => Object.keys(value).length !== 0);
 
+	linkupContainer.innerHTML = '';
+	userSuggestionsContainer.innerHTML = '';
 	buildPage(users);
 });
 
@@ -142,6 +155,9 @@ wssUserContract.on(wssUserContract.filters.UserUpdated(clientAddress), (log, use
 	clearInterval(profileFormLoadingInterval);
 
 	users[userID] = user;
+
+	linkupContainer.innerHTML = '';
+	userSuggestionsContainer.innerHTML = '';
 	buildPage(users);
 });
 
@@ -198,8 +214,6 @@ async function connect() {
 }
 
 async function connectListenerForButtons() {
-	noLinkupsContainer.classList.remove('hide');
-
 	users = await unconnectedUserContract.getUnconnectedAll();
 	linkups = await unconnectedLinkupContract.getUnconnectedAll();
 
@@ -217,7 +231,7 @@ async function connectListenerForButtons() {
 
 	// linkup
 	linkupForm.addEventListener('submit', () => connect());
-	linkups.forEach((linkup) => prependLinkUp(linkup));
+	linkups.forEach((linkup) => prependUnconnectedLinkUp(linkup));
 
 	let broadcastForms = document.querySelectorAll('.broadcastForm form');
 	broadcastForms.forEach((form) => {
@@ -238,8 +252,14 @@ async function buildPage(users) {
 
 	// profile
 	if (!user) {
+		noLinkupsContainer.classList.remove('hide');
+
 		profileNavAttentionInterval = setInterval(() => swingAttentionCircle(profileBtn), 800);
 		profileFormSaveBtn.addEventListener('click', () => createUser());
+
+		users = await unconnectedUserContract.getUnconnectedAll();
+		users.forEach((suggestion) => buildUserSuggestion(suggestion));
+
 		return;
 	}
 
@@ -257,8 +277,11 @@ async function buildPage(users) {
 	contacts = await userContactContract.getContacts(userID);
 
 	if (linkups.length > 0) {
+		noLinkupsContainer.classList.add('hide');
+	} else {
 		noLinkupsContainer.classList.remove('hide');
 	}
+
 	linkupForm.addEventListener('submit', (event) => createLinkup(event));
 	linkups.forEach((linkup) => prependLinkUp(linkup));
 
@@ -560,6 +583,90 @@ async function prependLinkUp(linkup) {
 	}
 }
 
+async function prependUnconnectedLinkUp(linkup) {
+	let linkupID = linkup.id.toNumber();
+
+	let linkupElement = newElement('div', ['linkup', 'columnContainer']);
+	linkupContainer.prepend(linkupElement);
+
+	// status
+	let statusElement = newElement('p', ['type'], '🎉 ' + linkup.status);
+	linkupElement.appendChild(statusElement);
+
+	// location
+	let locationElement = newElement('p', ['location'], ' ' + linkup.location);
+	console.log(linkup.location == '');
+	let locationIconElement = newElement('i', ['fa-solid', 'fa-location-dot']);
+	linkupElement.appendChild(locationElement);
+	locationElement.prepend(locationIconElement);
+
+	// moment
+	let momentElement = newElement('p', ['location'], ' ' + formatMoment(linkup));
+	let momentIconElement = newElement('i', ['fa-regular', 'fa-calendar']);
+	linkupElement.appendChild(momentElement);
+	momentElement.prepend(momentIconElement);
+
+	// description
+	let descriptionElement = newElement('p', 'description', ' ' + linkup.description);
+	linkupElement.appendChild(descriptionElement);
+
+	let broadcastedByElement = newElement('p', '', ' ' + 'Syiox');
+	let broadcastByIconElement = newElement('i', ['fa-solid', 'fa-bullhorn']);
+	broadcastedByElement.prepend(broadcastByIconElement);
+	linkupElement.appendChild(broadcastedByElement);
+
+	// members
+	let membersContainer = newElement('ul', 'members');
+	linkupElement.appendChild(membersContainer);
+
+	let memberElement01 = newElement('li', '', 'Jamaaly');
+	let memberElement02 = newElement('li', '', 'Mbolo');
+	let memberIconElement01 = newElement('i', ['fa-regular', 'fa-circle-check']);
+	let memberIconElement02 = newElement('i', ['fa-regular', 'fa-circle-check']);
+
+	memberElement01.append(memberIconElement01);
+	memberElement02.append(memberIconElement02);
+
+	membersContainer.append(memberElement01);
+	membersContainer.append(memberElement02);
+
+	// buttons (broadcast)
+	let buttonsContainer = newElement('div', 'buttons');
+	let broadcastFormContainer = newElement('div', ['broadcastForm']);
+
+	let broadcastFormElement = newElement('form');
+	let toElement = newElement('select');
+
+	let toOptionElement = newElement('option', '', 'Mistik');
+	toOptionElement.value = 1;
+	toElement.append(toOptionElement);
+
+	let submitElement = newElement('input');
+	submitElement.value = 'Broadcast';
+	submitElement.type = 'submit';
+
+	let broadcastLoadingContainer = createLoadingContainter();
+
+	buttonsContainer.append(broadcastFormContainer);
+	broadcastFormContainer.append(broadcastFormElement);
+	broadcastFormElement.append(toElement);
+	broadcastFormElement.append(submitElement);
+	broadcastFormContainer.append(broadcastLoadingContainer);
+	linkupElement.appendChild(buttonsContainer);
+
+	// buttons (join/leave)
+	let joinBlock = newElement('div', ['joinBtn']);
+	let joinBtnContainer = newElement('div');
+	let joinBtnElement = newElement('button', [], 'Join');
+
+	let joinLoadingContainer = createLoadingContainter();
+
+	joinBtnContainer.append(joinBtnElement);
+	joinBlock.append(joinBtnContainer);
+	joinBlock.appendChild(joinLoadingContainer);
+	linkupElement.appendChild(joinBlock);
+}
+
 function appendLeaveBtn(linkupElement, linkupID, userLinkup) {
 	let leaveBlock = newElement('div', ['leaveBtn']);
 	let leaveBtnContainer = newElement('div');
@@ -755,6 +862,7 @@ function search() {
 	let searchUsers = users.filter((searchUser) => {
 		return (
 			searchUser.fullname.toLowerCase().includes(searchValue) &&
+			searchUser.owner !== clientAddress &&
 			!contactIDs.includes(getUserID(searchUser.owner))
 		);
 	});
